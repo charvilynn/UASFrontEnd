@@ -6,3 +6,417 @@ datasource db {
   provider = "sqlite"
   url      = env("DATABASE_URL")
 }
+
+model User {
+  id             Int      @id @default(autoincrement())
+  name           String
+  email          String   @unique
+  passwordHash   String
+  role           String   @default("member")
+  memberCode     String   @unique
+  faculty        String?
+  phone          String?
+  bio            String?
+  avatarColor    String   @default("#92400E")
+  isVerified     Boolean  @default(false)
+  onboardingDone Boolean  @default(false)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  preferences     UserPreference[]
+  sessions        UserSession[]
+  loginHistory    LoginHistory[]
+  otpCodes        OtpCode[]
+  addedBooks      Book[]           @relation("AddedByUser")
+  loans           Loan[]
+  cartItems       BorrowCartItem[]
+  wishlists       Wishlist[]
+  reviews         Review[]
+  shelves         Shelf[]
+  readingGoals    ReadingGoal[]
+  readingHistory  ReadingHistory[]
+  fines           Fine[]
+  notifications   Notification[]
+  @@map("users")
+}
+
+model UserPreference {
+  id         Int      @id @default(autoincrement())
+  userId     Int
+  categoryId Int
+  createdAt  DateTime @default(now())
+
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, categoryId])
+  @@index([userId])
+  @@map("user_preferences")
+}
+
+model UserSession {
+  id        Int      @id @default(autoincrement())
+  token     String   @unique
+  userId    Int
+  userAgent String?
+  ipAddress String?
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("user_sessions")
+}
+
+model LoginHistory {
+  id        Int      @id @default(autoincrement())
+  userId    Int?
+  email     String
+  status    String
+  ipAddress String?
+  userAgent String?
+  reason    String?
+  createdAt DateTime @default(now())
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([createdAt])
+  @@map("login_history")
+}
+
+model OtpCode {
+  id         Int       @id @default(autoincrement())
+  userId     Int?
+  email      String
+  codeHash   String
+  purpose    String    @default("password_reset")
+  attempts   Int       @default(0)
+  expiresAt  DateTime
+  consumedAt DateTime?
+  ipAddress  String?
+  createdAt  DateTime  @default(now())
+
+  user User? @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([email, purpose])
+  @@map("otp_codes")
+}
+
+model Publisher {
+  id          Int      @id @default(autoincrement())
+  name        String   @unique
+  slug        String   @unique
+  city        String?
+  website     String?
+  foundedYear Int?
+  createdAt   DateTime @default(now())
+
+  books Book[]
+
+  @@index([name])
+  @@map("publishers")
+}
+
+model Author {
+  id          Int      @id @default(autoincrement())
+  name        String
+  slug        String   @unique
+  bio         String
+  nationality String   @default("Indonesia")
+  birthYear   Int?
+  photoPath   String?
+  createdAt   DateTime @default(now())
+
+  books BookAuthor[]
+
+  @@index([name])
+  @@map("authors")
+}
+
+model Category {
+  id          Int      @id @default(autoincrement())
+  name        String   @unique
+  slug        String   @unique
+  description String
+  iconName    String   @default("book-open")
+  accentColor String   @default("#92400E")
+  createdAt   DateTime @default(now())
+
+  books           BookCategory[]
+  userPreferences UserPreference[]
+
+  @@index([slug])
+  @@map("categories")
+}
+
+model Book {
+  id             Int      @id @default(autoincrement())
+  title          String
+  subtitle       String?
+  slug           String   @unique
+  publisherId    Int
+  publishYear    Int
+  isbn           String   @unique
+  language       String   @default("Indonesia")
+  pages          Int
+  description    String
+  sampleExcerpt  String?
+  coverPath      String?
+  stockTotal     Int      @default(3)
+  stockAvailable Int      @default(3)
+  isFeatured     Boolean  @default(false)
+  ratingAvg      Float    @default(4.5)
+  ratingCount    Int      @default(0)
+  addedById      Int?
+  source         String   @default("openlibrary")
+  sourceId       String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  publisher       Publisher        @relation(fields: [publisherId], references: [id], onDelete: Restrict)
+  addedBy         User?            @relation("AddedByUser", fields: [addedById], references: [id], onDelete: SetNull)
+  authors         BookAuthor[]
+  categories      BookCategory[]
+  loans           Loan[]
+  cartItems       BorrowCartItem[]
+  wishlists       Wishlist[]
+  reviews         Review[]
+  shelfBooks      ShelfBook[]
+  collectionBooks CollectionBook[]
+  readingHistory  ReadingHistory[]
+  @@index([title])
+  @@index([publishYear])
+  @@index([publisherId])
+  @@map("books")
+}
+
+model BookAuthor {
+  bookId   Int
+  authorId Int
+  role     String @default("primary")
+
+  book   Book   @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  author Author @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  @@id([bookId, authorId])
+  @@index([authorId])
+  @@map("book_authors")
+}
+
+model BookCategory {
+  bookId     Int
+  categoryId Int
+
+  book     Book     @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  category Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@id([bookId, categoryId])
+  @@index([categoryId])
+  @@map("book_categories")
+}
+
+model Collection {
+  id          Int      @id @default(autoincrement())
+  title       String
+  slug        String   @unique
+  subtitle    String
+  description String
+  curatorName String
+  accentColor String   @default("#92400E")
+  createdAt   DateTime @default(now())
+
+  books CollectionBook[]
+
+  @@index([slug])
+  @@map("collections")
+}
+
+model CollectionBook {
+  collectionId Int
+  bookId       Int
+  sortOrder    Int     @default(1)
+  curatorNote  String?
+
+  collection Collection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+  book       Book       @relation(fields: [bookId], references: [id], onDelete: Cascade)
+
+  @@id([collectionId, bookId])
+  @@map("collection_books")
+}
+
+model Loan {
+  id            Int       @id @default(autoincrement())
+  loanCode      String    @unique
+  userId        Int
+  bookId        Int
+  borrowedAt    DateTime  @default(now())
+  dueDate       DateTime
+  returnedAt    DateTime?
+  extendedCount Int       @default(0)
+  status        String    @default("borrowed")
+  notes         String?
+
+  user           User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  book           Book             @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  fine           Fine?
+  readingHistory ReadingHistory[]
+
+  @@index([userId])
+  @@index([bookId])
+  @@index([status])
+  @@map("loans")
+}
+
+model BorrowCartItem {
+  id           Int      @id @default(autoincrement())
+  userId       Int
+  bookId       Int
+  durationDays Int      @default(14)
+  addedAt      DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  book Book @relation(fields: [bookId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, bookId])
+  @@index([userId])
+  @@map("borrow_cart")
+}
+
+model Wishlist {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  bookId    Int
+  note      String?
+  priority  String   @default("normal")
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  book Book @relation(fields: [bookId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, bookId])
+  @@index([userId])
+  @@map("wishlists")
+}
+
+model Review {
+  id           Int      @id @default(autoincrement())
+  userId       Int
+  bookId       Int
+  rating       Int
+  title        String
+  comment      String
+  spoiler      Boolean  @default(false)
+  helpfulCount Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  book Book @relation(fields: [bookId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, bookId])
+  @@index([bookId])
+  @@map("reviews")
+}
+
+model Shelf {
+  id          Int      @id @default(autoincrement())
+  userId      Int
+  name        String
+  description String?
+  isPublic    Boolean  @default(false)
+  colorTag    String   @default("#92400E")
+  createdAt   DateTime @default(now())
+
+  user  User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  books ShelfBook[]
+
+  @@index([userId])
+  @@map("shelves")
+}
+
+model ShelfBook {
+  shelfId      Int
+  bookId       Int
+  sortOrder    Int      @default(1)
+  personalNote String?
+  addedAt      DateTime @default(now())
+
+  shelf Shelf @relation(fields: [shelfId], references: [id], onDelete: Cascade)
+  book  Book  @relation(fields: [bookId], references: [id], onDelete: Cascade)
+
+  @@id([shelfId, bookId])
+  @@map("shelf_books")
+}
+
+model ReadingGoal {
+  id           Int      @id @default(autoincrement())
+  userId       Int
+  year         Int
+  targetBooks  Int      @default(12)
+  targetPages  Int      @default(3600)
+  currentBooks Int      @default(0)
+  currentPages Int      @default(0)
+  updatedAt    DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, year])
+  @@map("reading_goals")
+}
+
+model ReadingHistory {
+  id         Int       @id @default(autoincrement())
+  userId     Int
+  bookId     Int
+  loanId     Int?
+  pagesRead  Int       @default(0)
+  startedAt  DateTime  @default(now())
+  finishedAt DateTime?
+  status     String    @default("completed")
+  reflection String?
+
+  user User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  book Book  @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  loan Loan? @relation(fields: [loanId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([bookId])
+  @@map("reading_history")
+}
+
+model Fine {
+  id          Int       @id @default(autoincrement())
+  loanId      Int       @unique
+  userId      Int
+  amount      Int
+  daysOverdue Int
+  status      String    @default("unpaid")
+  paidAt      DateTime?
+  paymentRef  String?
+  createdAt   DateTime  @default(now())
+
+  loan Loan @relation(fields: [loanId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([status])
+  @@map("fines")
+}
+
+model Notification {
+  id         Int      @id @default(autoincrement())
+  userId     Int
+  type       String
+  title      String
+  message    String
+  actionHref String   @default("/account/borrowed")
+  isRead     Boolean  @default(false)
+  createdAt  DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, isRead])
+  @@map("notifications")
+}
