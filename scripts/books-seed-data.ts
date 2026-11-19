@@ -157,4 +157,151 @@ export const BOOKS_SEED: RawBookSeed[] = [
     isbn: "978-0-7352-1129-2", publisher: "Avery", language: "English",
     available: true, featured: true, tags: ["Produktivitas", "Psikologi", "Kebiasaan"]
   },
+  {
+    id: 17, title: "Ikigai", author: "Hector Garcia & Francesc Miralles", genre: "Self-Help",
+    rating: 4.4, ratingCount: 2890, year: 2016, pages: 194,
+    synopsis: "Rahasia umur panjang dan kebahagiaan warga Okinawa Jepang dalam menemukan alasan untuk bangun dengan semangat setiap pagi.",
+    isbn: "978-0-14-313072-7", publisher: "Penguin Life", language: "Spanish",
+    available: true, featured: true, tags: ["Jepang", "Filosofi", "Kebahagiaan"]
+  },
+  {
+    id: 18, title: "Think and Grow Rich", author: "Napoleon Hill", genre: "Self-Help",
+    rating: 4.3, ratingCount: 7124, year: 1937, pages: 320,
+    synopsis: "Tiga belas prinsip pencapaian tujuan hidup berdasarkan studi selama dua dekade terhadap para tokoh sukses.",
+    isbn: "978-1-59330-200-9", publisher: "Tarcher Perigee", language: "English",
+    available: false, featured: false, tags: ["Bisnis", "Motivasi", "Sukses"]
+  },
+  {
+    id: 19, title: "Deep Work", author: "Cal Newport", genre: "Self-Help",
+    rating: 4.6, ratingCount: 4512, year: 2016, pages: 304,
+    synopsis: "Strategi melatih konsentrasi penuh tanpa distraksi untuk menghasilkan karya bernilai tinggi di tengah kebisingan digital.",
+    isbn: "978-1-4555-8669-1", publisher: "Grand Central", language: "English",
+    available: true, featured: false, tags: ["Produktivitas", "Fokus", "Karir"]
+  },
+  {
+    id: 20, title: "Mindset: The New Psychology of Success", author: "Carol S. Dweck", genre: "Self-Help",
+    rating: 4.5, ratingCount: 5678, year: 2006, pages: 277,
+    synopsis: "Penelitian psikologi tentang perbedaan pola pikir tetap (fixed mindset) dan pola pikir bertumbuh (growth mindset).",
+    isbn: "978-0-345-47232-8", publisher: "Ballantine Books", language: "English",
+    available: true, featured: false, tags: ["Psikologi", "Pertumbuhan", "Pendidikan"]
+  },
+  {
+    id: 21, title: "Filosofi Teras", author: "Henry Manampiring", genre: "Self-Help",
+    rating: 4.6, ratingCount: 1893, year: 2019, pages: 262,
+    synopsis: "Penerapan filsafat Stoa Yunani-Romawi kuno dengan bahasa populer untuk menjaga ketenangan mental di masa kini.",
+    isbn: "978-602-06-3475-3", publisher: "Penerbit Buku Kompas", language: "Indonesia",
+    available: true, featured: true, tags: ["Filsafat", "Stoikisme", "Indonesia"]
+  },
+  {
+    id: 22, title: "Grit: The Power of Passion and Perseverance", author: "Angela Duckworth", genre: "Self-Help",
+    rating: 4.4, ratingCount: 3901, year: 2016, pages: 352,
+    synopsis: "Mengapa perpaduan antara hasrat jangka panjang dan ketekunan lebih menentukan keberhasilan dibandingkan bakat semata.",
+    isbn: "978-1-5011-1111-2", publisher: "Scribner", language: "English",
+    available: true, featured: false, tags: ["Psikologi", "Kegigihan", "Sukses"]
+  },
+  {
+    id: 23, title: "The Power of Now", author: "Eckhart Tolle", genre: "Self-Help",
+    rating: 4.5, ratingCount: 6234, year: 1997, pages: 229,
+    synopsis: "Panduan kesadaran diri untuk melepaskan kecemasan masa depan dan penyesalan masa lalu dengan hadir di saat ini.",
+    isbn: "978-1-57731-480-6", publisher: "New World Library", language: "English",
+    available: false, featured: false, tags: ["Spiritual", "Mindfulness", "Kesadaran"]
+  },
+  {
+    id: 24, title: "Sapiens: A Brief History of Humankind", author: "Yuval Noah Harari", genre: "Non-Fiction",
+    rating: 4.6, ratingCount: 5473, year: 2011, pages: 443,
+    synopsis: "Penelusuran sejarah Homo sapiens mulai dari revolusi kognitif, revolusi agrikultur, hingga revolusi ilmiah modern.",
+    isbn: "978-0-06-231609-7", publisher: "Harper", language: "English",
+    available: false, featured: false, tags: ["Sejarah", "Antropologi", "Filsafat"]
+  },
+  {
+    id: 25, title: "Educated", author: "Tara Westover", genre: "Non-Fiction",
+    rating: 4.7, ratingCount: 4321, year: 2018, pages: 334,
+    synopsis: "Memoar perjuangan seorang perempuan yang baru menginjak ruang kelas pada usia 17 tahun hingga meraih gelar doktor di Cambridge.",
+    isbn: "978-0-399-59050-4", publisher: "Random House", language: "English",
+    available: true, featured: false, tags: ["Memoar", "Pendidikan", "Inspirasi"]
+  },
+  {
+    id: 26, title: "Brief Answers to the Big Questions", author: "Stephen Hawking", genre: "Non-Fiction",
+    rating: 4.5, ratingCount: 3210, year: 2018, pages: 256,
+    synopsis: "Pemikiran terakhir fisikawan Stephen Hawking menjawab sepuluh pertanyaan mendasar tentang alam semesta dan masa depan manusia.",
+    isbn: "978-1-473-69570-2", publisher: "John Murray", language: "English",
+    available: true, featured: false, tags: ["Sains", "Fisika", "Kosmologi"]
+  },
+  {
+    id: 27, title: "Thinking, Fast and Slow", author: "Daniel Kahneman", genre: "Non-Fiction",
+    rating: 4.6, ratingCount: 7890, year: 2011, pages: 499,
+    synopsis: "Peraih Nobel Ekonomi membedah Sistem 1 (cepat dan intuitif) serta Sistem 2 (lambat dan logis) beserta bias kognitif manusia.",
+    isbn: "978-0-374-53355-7", publisher: "Farrar, Straus and Giroux", language: "English",
+    available: true, featured: false, tags: ["Psikologi", "Ekonomi Perilaku", "Keputusan"]
+  },
+  {
+    id: 28, title: "Zero to One", author: "Peter Thiel", genre: "Non-Fiction",
+    rating: 4.5, ratingCount: 4512, year: 2014, pages: 224,
+    synopsis: "Catatan kuliah kewirausahaan Stanford tentang cara menciptakan terobosan teknologi baru, bukan sekadar menyalin model yang sudah ada.",
+    isbn: "978-0-8041-3902-1", publisher: "Crown Business", language: "English",
+    available: true, featured: false, tags: ["Startup", "Inovasi", "Bisnis"]
+  },
+  {
+    id: 29, title: "The Body: A Guide for Occupants", author: "Bill Bryson", genre: "Non-Fiction",
+    rating: 4.5, ratingCount: 2901, year: 2019, pages: 464,
+    synopsis: "Tur anatomi dan fisiologi yang hangat serta jenaka mengenai cara kerja organ, sistem imun, dan otak manusia.",
+    isbn: "978-0-385-53930-2", publisher: "Doubleday", language: "English",
+    available: true, featured: false, tags: ["Biologi", "Kesehatan", "Sains"]
+  },
+  {
+    id: 30, title: "Homo Deus: A Brief History of Tomorrow", author: "Yuval Noah Harari", genre: "Non-Fiction",
+    rating: 4.4, ratingCount: 3102, year: 2015, pages: 450,
+    synopsis: "Eksplorasi masa depan kemanusiaan ketika bioteknologi, algoritma, dan kecerdasan buatan mengubah tatanan masyarakat.",
+    isbn: "978-0-06-246431-6", publisher: "Harper", language: "English",
+    available: false, featured: false, tags: ["Futurisme", "Teknologi", "Filsafat"]
+  },
+  {
+    id: 31, title: "Harry Potter and the Philosopher's Stone", author: "J.K. Rowling", genre: "Fantasy",
+    rating: 4.8, ratingCount: 12450, year: 1997, pages: 309,
+    synopsis: "Harry Potter mengetahui bahwa dirinya adalah penyihir pada ulang tahun kesebelasnya dan memulai tahun pertama di Hogwarts.",
+    isbn: "978-0-590-35342-7", publisher: "Bloomsbury", language: "English",
+    available: false, featured: false, tags: ["Fantasi", "Petualangan", "Anak-anak"]
+  },
+  {
+    id: 32, title: "The Hobbit", author: "J.R.R. Tolkien", genre: "Fantasy",
+    rating: 4.7, ratingCount: 9832, year: 1937, pages: 310,
+    synopsis: "Bilbo Baggins meninggalkan liang hobbit yang nyaman untuk membantu Thorin Oakenshield merebut kembali Erebor dari naga Smaug.",
+    isbn: "978-0-547-92822-7", publisher: "Houghton Mifflin", language: "English",
+    available: true, featured: false, tags: ["Fantasi", "Petualangan", "Epik"]
+  },
+  {
+    id: 33, title: "The Name of the Wind", author: "Patrick Rothfuss", genre: "Fantasy",
+    rating: 4.8, ratingCount: 6721, year: 2007, pages: 662,
+    synopsis: "Riwayat hidup Kvothe dari rombongan seniman keliling hingga menjadi mahasiswa termuda di Universitas Sihir.",
+    isbn: "978-0-7564-0407-9", publisher: "DAW Books", language: "English",
+    available: true, featured: false, tags: ["Fantasi", "Epik", "Musik"]
+  },
+  {
+    id: 34, title: "The Alchemist", author: "Paulo Coelho", genre: "Fantasy",
+    rating: 4.5, ratingCount: 8923, year: 1988, pages: 197,
+    synopsis: "Pengembaraan Santiago, gembala muda Andalusia, melintasi gurun Sahara demi mengejar legenda pribadinya.",
+    isbn: "978-0-06-231500-7", publisher: "HarperOne", language: "Portuguese",
+    available: true, featured: true, tags: ["Inspirasi", "Petualangan", "Spiritual"]
+  },
+  {
+    id: 35, title: "A Game of Thrones", author: "George R.R. Martin", genre: "Fantasy",
+    rating: 4.7, ratingCount: 11234, year: 1996, pages: 694,
+    synopsis: "Keluarga bangsawan Stark, Lannister, dan Targaryen bertarung memperebutkan Iron Throne menjelang datangnya musim dingin panjang.",
+    isbn: "978-0-553-38168-9", publisher: "Bantam", language: "English",
+    available: false, featured: false, tags: ["Fantasi", "Epik", "Politik"]
+  },
+  {
+    id: 36, title: "The Pillars of the Earth", author: "Ken Follett", genre: "Historical Fiction",
+    rating: 4.8, ratingCount: 7823, year: 1989, pages: 973,
+    synopsis: "Kisah pembangunan katedral Gotik di Kingsbridge Inggris abad ke-12 di tengah gejolak perang saudara dan ambisi manusia.",
+    isbn: "978-0-451-16689-0", publisher: "Signet", language: "English",
+    available: true, featured: false, tags: ["Inggris Abad Pertengahan", "Arsitektur", "Epik"]
+  },
+  {
+    id: 37, title: "All the Light We Cannot See", author: "Anthony Doerr", genre: "Historical Fiction",
+    rating: 4.7, ratingCount: 6341, year: 2014, pages: 531,
+    synopsis: "Gadis Prancis tunanetra Marie-Laure dan teknisi radio muda Jerman Werner bertemu di kota Saint-Malo pada masa Perang Dunia II.",
+    isbn: "978-1-5011-7321-9", publisher: "Scribner", language: "English",
+    available: true, featured: false, tags: ["Perang Dunia II", "Prancis", "Drama"]
+  },
 ];
