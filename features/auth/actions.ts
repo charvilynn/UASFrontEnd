@@ -1,9 +1,16 @@
 "use server";
 
+import crypto from "node:crypto";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
-import { createSession, hashPassword, verifyPassword } from "@/lib/auth";
+import {
+  createSession,
+  hashOtpCode,
+  hashPassword,
+  setResetPasswordTokenCookie,
+  verifyPassword,
+} from "@/lib/auth";
 
 export async function loginUserAction(formData: FormData): Promise<void> {
   const email = String(formData.get("email") || "")
@@ -175,4 +182,156 @@ export async function registerUserAction(formData: FormData): Promise<void> {
 
   revalidatePath("/", "layout");
   redirect("/onboarding");
+}
+
+export interface RequestResetOtpResult {
+  ok: boolean;
+  message?: string;
+  error?: string;
+  simulationCode?: string;
+  expiresInMinutes?: number;
+}
+
+export async function requestPasswordResetOtpAction(
+  rawEmail: string,
+): Promise<RequestResetOtpResult> {
+  const email = String(rawEmail || "")
+    .trim()
+    .toLowerCase();
+
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    return {
+      ok: false,
+      error: "Masukkan alamat email yang valid.",
+    };
+  }
+
+  const fifteenMinutesAgo = new Date(Date.now() - 15 * 60 * 1000);
+  const recentRequests = await prisma.otpCode.count({
+    where: {
+      email,
+      purpose: "password_reset",
+      createdAt: { gte: fifteenMinutesAgo },
+    },
+  });
+
+  if (recentRequests >= 3) {
+    return {
+      ok: false,
+      error:
+        "Batas permintaan kode tercapai (maksimal 3 kali per 15 menit). Silakan tunggu sebentar sebelum meminta kode baru.",
+    };
+  }
+
+  const user = await prisma.user.findUnique({
+    where: { email },
+  });
+
+  const rawCode = crypto.randomInt(100000, 1000000).toString();
+  const codeHash = hashOtpCode(rawCode);
+  const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
+
+  await prisma.otpCode.create({
+    data: {
+      userId: user ? user.id : null,
+      email,
+      codeHash,
+      purpose: "password_reset",
+      attempts: 0,
+      expiresAt,
+      ipAddress: "127.0.0.1",
+    },
+  });
+
+  const isSimulation = process.env.OTP_SIMULATION !== "false";
+
+  return {
+    ok: true,
+    message: "Jika email terdaftar, kode sudah dikirim.",
+    simulationCode: isSimulation ? rawCode : undefined,
+    expiresInMinutes: 10,
+  };
+}
+
+export interface VerifyResetOtpResult {
+  ok: boolean;
+  error?: string;
+}
+
+export async function verifyPasswordResetOtpAction(
+  rawEmail: string,
+  rawCode: string,
+): Promise<VerifyResetOtpResult> {
+  const email = String(rawEmail || "")
+    .trim()
+    .toLowerCase();
+  const code = String(rawCode || "")
+    .replace(/\D+/g, "")
+    .trim();
+
+  if (!email || code.length !== 6) {
+    return {
+      ok: false,
+      error: "Masukkan 6 digit angka kode verifikasi secara lengkap.",
+    };
+  }
+
+  const latestOtp = await prisma.otpCode.findFirst({
+    where: {
+      email,
+      purpose: "password_reset",
+      consumedAt: null,
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
+
+  if (!latestOtp || latestOtp.expiresAt < new Date()) {
+    return {
+      ok: false,
+      error:
+        "Kode OTP tidak ditemukan atau sudah kedaluwarsa (berlaku 10 menit). Silakan minta kode baru.",
+    };
+  }
+
+  if (latestOtp.attempts >= 5) {
+    return {
+      ok: false,
+      error:
+        "Kode OTP ini telah hangus karena salah dimasukkan 5 kali. Silakan kirim ulang kode baru.",
+    };
+  }
+
+  const candidateHash = hashOtpCode(code);
+  if (candidateHash !== latestOtp.codeHash) {
+    const nextAttempts = latestOtp.attempts + 1;
+    await prisma.otpCode.update({
+      where: { id: latestOtp.id },
+      data: {
+        attempts: nextAttempts,
+        ...(nextAttempts >= 5 ? { expiresAt: new Date(0) } : {}),
+      },
+    });
+
+    const remaining = Math.max(0, 5 - nextAttempts);
+    return {
+      ok: false,
+      error:
+        remaining > 0
+          ? `Kode OTP tidak sesuai. Sisa kesempatan percobaan: ${remaining} kali.`
+          : "Kode OTP telah hangus setelah 5 kali percobaan gagal. Silakan minta kode baru.",
+    };
+  }
+
+  await prisma.otpCode.update({
+    where: { id: latestOtp.id },
+    data: {
+      consumedAt: new Date(),
+    },
+  });
+
+  await setResetPasswordTokenCookie(email, latestOtp.id);
+
+  return { ok: true };
 }
