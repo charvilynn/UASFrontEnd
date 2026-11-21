@@ -235,3 +235,254 @@ export async function returnBookAction(formData: FormData): Promise<void> {
   revalidatePath("/explore");
   revalidatePath("/", "layout");
 }
+
+export async function logReadingHistoryAction(
+  formData: FormData
+): Promise<void> {
+  const sessionUser = await requireAuth("/account/history");
+
+  const historyId = Number(formData.get("historyId") ?? 0);
+  const bookId = Number(formData.get("bookId") ?? 0);
+  const rawPages = Number(formData.get("pagesRead") ?? 0);
+  const rawStatus = String(formData.get("status") ?? "reading").trim();
+  const rawReflection = String(formData.get("reflection") ?? "").trim();
+
+  const validStatuses = ["reading", "completed", "dropped"];
+  const status = validStatuses.includes(rawStatus) ? rawStatus : "reading";
+
+  if (Number.isInteger(historyId) && historyId > 0) {
+    const existing = await prisma.readingHistory.findFirst({
+      where: {
+        id: historyId,
+        userId: sessionUser.id,
+      },
+      include: { book: true },
+    });
+
+    if (!existing) {
+      return;
+    }
+
+    const pagesRead =
+      status === "completed" && rawPages <= 0
+        ? existing.book.pages
+        : Math.max(0, Math.min(rawPages, existing.book.pages * 2));
+
+    await prisma.readingHistory.update({
+      where: { id: existing.id },
+      data: {
+        pagesRead,
+        status,
+        reflection: rawReflection || existing.reflection,
+        finishedAt:
+          status === "completed" ? existing.finishedAt ?? new Date() : null,
+      },
+    });
+  } else if (Number.isInteger(bookId) && bookId > 0) {
+    const book = await prisma.book.findUnique({
+      where: { id: bookId },
+    });
+
+    if (!book) {
+      return;
+    }
+
+    const pagesRead =
+      status === "completed" && rawPages <= 0
+        ? book.pages
+        : Math.max(1, Math.min(rawPages > 0 ? rawPages : book.pages, book.pages));
+
+    const existingForBook = await prisma.readingHistory.findFirst({
+      where: {
+        userId: sessionUser.id,
+        bookId: book.id,
+      },
+      orderBy: { startedAt: "desc" },
+    });
+
+    if (existingForBook) {
+      await prisma.readingHistory.update({
+        where: { id: existingForBook.id },
+        data: {
+          pagesRead,
+          status,
+          reflection: rawReflection || existingForBook.reflection,
+          finishedAt: status === "completed" ? new Date() : null,
+        },
+      });
+    } else {
+      await prisma.readingHistory.create({
+        data: {
+          userId: sessionUser.id,
+          bookId: book.id,
+          pagesRead,
+          startedAt: new Date(),
+          finishedAt: status === "completed" ? new Date() : null,
+          status,
+          reflection:
+            rawReflection ||
+            `Mencatat progres bacaan untuk buku "${book.title}".`,
+        },
+      });
+    }
+  } else {
+    return;
+  }
+
+  const allHistory = await prisma.readingHistory.findMany({
+    where: { userId: sessionUser.id },
+  });
+  const completedBooks = allHistory.filter(
+    (entry) => entry.status === "completed"
+  ).length;
+  const totalPages = allHistory.reduce(
+    (sum, entry) => sum + Math.max(0, entry.pagesRead),
+    0
+  );
+
+  await prisma.readingGoal.upsert({
+    where: {
+      userId_year: {
+        userId: sessionUser.id,
+        year: 2026,
+      },
+    },
+    update: {
+      currentBooks: completedBooks,
+      currentPages: totalPages,
+    },
+    create: {
+      userId: sessionUser.id,
+      year: 2026,
+      targetBooks: 12,
+      targetPages: 3600,
+      currentBooks: completedBooks,
+      currentPages: totalPages,
+    },
+  });
+
+  revalidatePath("/account/history");
+  revalidatePath("/account/reading-goals");
+  revalidatePath("/account/profile");
+}
+
+export async function markNotificationReadAction(
+  formData: FormData
+): Promise<void> {
+  const sessionUser = await requireAuth("/account/notifications");
+  const notificationId = Number(formData.get("notificationId"));
+
+  if (!Number.isInteger(notificationId) || notificationId <= 0) {
+    return;
+  }
+
+  await prisma.notification.updateMany({
+    where: {
+      id: notificationId,
+      userId: sessionUser.id,
+    },
+    data: {
+      isRead: true,
+    },
+  });
+
+  revalidatePath("/account/notifications");
+  revalidatePath("/account/profile");
+  revalidatePath("/", "layout");
+}
+
+export async function markAllNotificationsReadAction(): Promise<void> {
+  const sessionUser = await requireAuth("/account/notifications");
+
+  await prisma.notification.updateMany({
+    where: {
+      userId: sessionUser.id,
+      isRead: false,
+    },
+    data: {
+      isRead: true,
+    },
+  });
+
+  revalidatePath("/account/notifications");
+  revalidatePath("/account/profile");
+  revalidatePath("/", "layout");
+}
+
+export async function updateReadingGoalAction(
+  formData: FormData
+): Promise<void> {
+  const sessionUser = await requireAuth("/account/reading-goals");
+
+  const existingGoal = await prisma.readingGoal.findUnique({
+    where: {
+      userId_year: {
+        userId: sessionUser.id,
+        year: 2026,
+      },
+    },
+  });
+
+  const rawTargetBooks = Number(
+    formData.get("targetBooks") ?? existingGoal?.targetBooks ?? 12
+  );
+  const rawTargetPages = Number(
+    formData.get("targetPages") ?? existingGoal?.targetPages ?? 3600
+  );
+  const rawCurrentBooks = Number(
+    formData.get("currentBooks") ?? existingGoal?.currentBooks ?? 0
+  );
+  const rawCurrentPages = Number(
+    formData.get("currentPages") ?? existingGoal?.currentPages ?? 0
+  );
+
+  const targetBooks = Number.isFinite(rawTargetBooks)
+    ? Math.max(1, Math.min(200, Math.round(rawTargetBooks)))
+    : 12;
+  const targetPages = Number.isFinite(rawTargetPages)
+    ? Math.max(100, Math.min(100000, Math.round(rawTargetPages)))
+    : 3600;
+  const currentBooks = Number.isFinite(rawCurrentBooks)
+    ? Math.max(0, Math.min(500, Math.round(rawCurrentBooks)))
+    : 0;
+  const currentPages = Number.isFinite(rawCurrentPages)
+    ? Math.max(0, Math.min(200000, Math.round(rawCurrentPages)))
+    : 0;
+
+  await prisma.readingGoal.upsert({
+    where: {
+      userId_year: {
+        userId: sessionUser.id,
+        year: 2026,
+      },
+    },
+    update: {
+      targetBooks,
+      targetPages,
+      currentBooks,
+      currentPages,
+    },
+    create: {
+      userId: sessionUser.id,
+      year: 2026,
+      targetBooks,
+      targetPages,
+      currentBooks,
+      currentPages,
+    },
+  });
+
+  await prisma.notification.create({
+    data: {
+      userId: sessionUser.id,
+      type: "info",
+      title: "Target Baca Tahunan 2026 Diperbarui",
+      message: `Target literasi 2026 disesuaikan menjadi ${targetBooks} buku (${targetPages.toLocaleString("id-ID")} halaman) dengan realisasi saat ini ${currentBooks} buku (${currentPages.toLocaleString("id-ID")} halaman).`,
+      actionHref: "/account/reading-goals",
+    },
+  });
+
+  revalidatePath("/account/reading-goals");
+  revalidatePath("/account/profile");
+  revalidatePath("/account/notifications");
+}
