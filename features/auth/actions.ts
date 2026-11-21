@@ -1,0 +1,178 @@
+"use server";
+
+import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
+import { prisma } from "@/lib/db";
+import { createSession, hashPassword, verifyPassword } from "@/lib/auth";
+
+export async function loginUserAction(formData: FormData): Promise<void> {
+  const email = String(formData.get("email") || "")
+    .trim()
+    .toLowerCase();
+  const password = String(formData.get("password") || "");
+  const nextRaw = String(formData.get("next") || "").trim();
+  const nextPath = nextRaw.startsWith("/") ? nextRaw : "/";
+
+  if (!email || !password) {
+    const errParams = new URLSearchParams({
+      error: "Email dan kata sandi wajib diisi.",
+    });
+    if (nextRaw.startsWith("/")) errParams.set("next", nextRaw);
+    redirect(`/login?${errParams.toString()}`);
+  }
+
+  const user = await prisma.user.findUnique({
+    where: { email },
+  });
+
+  if (!user) {
+    await prisma.loginHistory.create({
+      data: {
+        userId: null,
+        email,
+        status: "failed",
+        ipAddress: "127.0.0.1",
+        userAgent: "Charvlibrary Web Auth (Next.js 16)",
+        reason: "Gagal masuk: alamat email belum terdaftar di pangkalan data",
+      },
+    });
+    const errParams = new URLSearchParams({
+      error: "Akun dengan alamat email tersebut tidak ditemukan.",
+    });
+    if (nextRaw.startsWith("/")) errParams.set("next", nextRaw);
+    redirect(`/login?${errParams.toString()}`);
+  }
+
+  const isPasswordValid = await verifyPassword(password, user.passwordHash);
+  if (!isPasswordValid) {
+    await prisma.loginHistory.create({
+      data: {
+        userId: user.id,
+        email: user.email,
+        status: "failed",
+        ipAddress: "127.0.0.1",
+        userAgent: "Charvlibrary Web Auth (Next.js 16)",
+        reason: "Gagal masuk: kata sandi tidak cocok dengan kredensial akun",
+      },
+    });
+    const errParams = new URLSearchParams({
+      error: "Kata sandi yang Anda masukkan salah. Silakan coba kembali.",
+    });
+    if (nextRaw.startsWith("/")) errParams.set("next", nextRaw);
+    redirect(`/login?${errParams.toString()}`);
+  }
+
+  await createSession(user.id, "Charvlibrary Web Browser (Sesi Kredensial)", "127.0.0.1");
+
+  await prisma.loginHistory.create({
+    data: {
+      userId: user.id,
+      email: user.email,
+      status: "success",
+      ipAddress: "127.0.0.1",
+      userAgent: "Charvlibrary Web Browser (Sesi Kredensial)",
+      reason: "Autentikasi email dan kata sandi berhasil",
+    },
+  });
+
+  revalidatePath("/", "layout");
+  redirect(nextPath);
+}
+
+export async function registerUserAction(formData: FormData): Promise<void> {
+  const name = String(formData.get("name") || "").trim();
+  const email = String(formData.get("email") || "")
+    .trim()
+    .toLowerCase();
+  const faculty = String(formData.get("faculty") || "").trim() || "Fakultas Ilmu Komputer";
+  const phone = String(formData.get("phone") || "").trim() || null;
+  const bio =
+    String(formData.get("bio") || "").trim() || "Anggota aktif perpustakaan akademik Charvlibrary.";
+  const password = String(formData.get("password") || "");
+  const avatarColor = String(formData.get("avatarColor") || "").trim() || "#92400E";
+
+  if (!name || !email || !password) {
+    redirect(
+      "/register?error=" +
+        encodeURIComponent("Nama lengkap, email kampus, dan kata sandi wajib diisi."),
+    );
+  }
+
+  if (password.length < 8) {
+    redirect(
+      "/register?error=" + encodeURIComponent("Kata sandi minimal harus terdiri dari 8 karakter."),
+    );
+  }
+
+  const existingUser = await prisma.user.findUnique({
+    where: { email },
+  });
+
+  if (existingUser) {
+    redirect(
+      "/register?error=" +
+        encodeURIComponent("Alamat email sudah terdaftar. Silakan masuk menggunakan akun Anda."),
+    );
+  }
+
+  const randomDigits = Math.floor(1000 + Math.random() * 9000);
+  let memberCode = `CHV-2026-${randomDigits}`;
+  const codeExists = await prisma.user.findUnique({
+    where: { memberCode },
+  });
+  if (codeExists) {
+    memberCode = `CHV-2026-${Math.floor(1000 + Math.random() * 9000)}`;
+  }
+
+  const passwordHash = await hashPassword(password);
+
+  const newUser = await prisma.user.create({
+    data: {
+      name,
+      email,
+      passwordHash,
+      role: "member",
+      memberCode,
+      faculty,
+      phone,
+      bio,
+      avatarColor,
+      isVerified: true,
+      onboardingDone: false,
+    },
+  });
+
+  await prisma.readingGoal.upsert({
+    where: {
+      userId_year: {
+        userId: newUser.id,
+        year: 2026,
+      },
+    },
+    update: {},
+    create: {
+      userId: newUser.id,
+      year: 2026,
+      targetBooks: 12,
+      targetPages: 3600,
+      currentBooks: 0,
+      currentPages: 0,
+    },
+  });
+
+  await prisma.loginHistory.create({
+    data: {
+      userId: newUser.id,
+      email: newUser.email,
+      status: "success",
+      ipAddress: "127.0.0.1",
+      userAgent: "Charvlibrary Member Registration",
+      reason: `Registrasi anggota baru berhasil (${memberCode})`,
+    },
+  });
+
+  await createSession(newUser.id, "Charvlibrary Member Registration", "127.0.0.1");
+
+  revalidatePath("/", "layout");
+  redirect("/onboarding");
+}
