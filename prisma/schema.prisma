@@ -37,6 +37,11 @@ model User {
   readingHistory  ReadingHistory[]
   fines           Fine[]
   notifications   Notification[]
+  blogComments    BlogComment[]
+  eventRsvps      EventRsvp[]
+  clubDiscussions ClubDiscussion[]
+  contactMessages ContactMessage[]
+
   @@map("users")
 }
 
@@ -186,6 +191,8 @@ model Book {
   shelfBooks      ShelfBook[]
   collectionBooks CollectionBook[]
   readingHistory  ReadingHistory[]
+  readingClubs    ReadingClub[]
+
   @@index([title])
   @@index([publishYear])
   @@index([publisherId])
@@ -419,4 +426,147 @@ model Notification {
 
   @@index([userId, isRead])
   @@map("notifications")
+}
+
+model BlogPost {
+  id              Int      @id @default(autoincrement())
+  title           String
+  slug            String   @unique
+  category        String
+  authorName      String
+  authorRole      String   @default("Editor Literasi")
+  readTimeMinutes Int      @default(6)
+  excerpt         String
+  content         String
+  coverPath       String?
+  isFeatured      Boolean  @default(false)
+  publishedAt     DateTime @default(now())
+
+  comments BlogComment[]
+
+  @@index([slug])
+  @@index([category])
+  @@map("blog_posts")
+}
+
+model BlogComment {
+  id        Int      @id @default(autoincrement())
+  postId    Int
+  userId    Int
+  content   String
+  createdAt DateTime @default(now())
+
+  post BlogPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([postId])
+  @@map("blog_comments")
+}
+
+model Event {
+  id          Int      @id @default(autoincrement())
+  title       String
+  slug        String   @unique
+  category    String
+  eventDate   String
+  eventTime   String
+  location    String
+  speakerName String
+  description String
+  agenda      String
+  maxQuota    Int      @default(50)
+  coverPath   String?
+  createdAt   DateTime @default(now())
+
+  rsvps EventRsvp[]
+
+  @@index([eventDate])
+  @@index([category])
+  @@map("events")
+}
+
+model EventRsvp {
+  id            Int      @id @default(autoincrement())
+  eventId       Int
+  userId        Int
+  attendeeName  String
+  attendeeEmail String
+  notes         String?
+  status        String   @default("confirmed")
+  ticketCode    String   @unique
+  createdAt     DateTime @default(now())
+
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([eventId, userId])
+  @@index([eventId])
+  @@map("event_rsvps")
+}
+
+model ReadingClub {
+  id              Int      @id @default(autoincrement())
+  name            String
+  slug            String   @unique
+  description     String
+  currentBookId   Int
+  meetingSchedule String
+  memberCount     Int      @default(24)
+  createdAt       DateTime @default(now())
+
+  currentBook Book             @relation(fields: [currentBookId], references: [id], onDelete: Cascade)
+  discussions ClubDiscussion[]
+
+  @@index([slug])
+  @@map("reading_clubs")
+}
+
+model ClubDiscussion {
+  id         Int      @id @default(autoincrement())
+  clubId     Int
+  userId     Int
+  title      String
+  content    String
+  likesCount Int      @default(0)
+  createdAt  DateTime @default(now())
+
+  club ReadingClub @relation(fields: [clubId], references: [id], onDelete: Cascade)
+  user User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([clubId])
+  @@map("club_discussions")
+}
+
+model Faq {
+  id         Int    @id @default(autoincrement())
+  question   String
+  answer     String
+  category   String
+  sortOrder  Int    @default(1)
+  helpfulYes Int    @default(12)
+  helpfulNo  Int    @default(1)
+
+  @@index([category])
+  @@map("faqs")
+}
+
+model ContactMessage {
+  id           Int       @id @default(autoincrement())
+  ticketNumber String    @unique
+  userId       Int?
+  name         String
+  email        String
+  subject      String
+  category     String    @default("Pertanyaan Umum")
+  message      String
+  status       String    @default("open")
+  adminReply   String?
+  createdAt    DateTime  @default(now())
+  repliedAt    DateTime?
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([status])
+  @@index([createdAt])
+  @@map("contact_messages")
 }
