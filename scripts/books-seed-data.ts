@@ -458,4 +458,151 @@ export const BOOKS_SEED: RawBookSeed[] = [
     isbn: "978-1-4516-4853-9", publisher: "Simon & Schuster", language: "English",
     available: true, featured: false, tags: ["Biografi", "Teknologi", "Kepemimpinan"]
   },
+  {
+    id: 60, title: "Becoming", author: "Michelle Obama", genre: "Biography",
+    rating: 4.7, ratingCount: 10234, year: 2018, pages: 448,
+    synopsis: "Memoar reflektif Michelle Obama mengenai masa kecil di Chicago, perjalanan karir hukum, hingga pelayanan publik.",
+    isbn: "978-1-5247-6313-8", publisher: "Crown", language: "English",
+    available: false, featured: false, tags: ["Biografi", "Kepemimpinan", "Inspirasi"]
+  },
+  {
+    id: 61, title: "Long Walk to Freedom", author: "Nelson Mandela", genre: "Biography",
+    rating: 4.8, ratingCount: 7812, year: 1994, pages: 656,
+    synopsis: "Autobiografi perjuangan panjang Nelson Mandela melawan apartheid hingga rekonsiliasi nasional di Afrika Selatan.",
+    isbn: "978-0-316-54818-2", publisher: "Little, Brown", language: "English",
+    available: true, featured: false, tags: ["Biografi", "Sejarah", "Afrika"]
+  },
+  {
+    id: 62, title: "When Breath Becomes Air", author: "Paul Kalanithi", genre: "Biography",
+    rating: 4.8, ratingCount: 5678, year: 2016, pages: 228,
+    synopsis: "Catatan mengharukan seorang residen bedah saraf yang beralih peran menjadi pasien dan merenungkan apa yang membuat hidup bermakna.",
+    isbn: "978-0-8129-8840-6", publisher: "Random House", language: "English",
+    available: true, featured: false, tags: ["Memoar", "Kedokteran", "Refleksi"]
+  },
+  {
+    id: 63, title: "Pride and Prejudice", author: "Jane Austen", genre: "Romance",
+    rating: 4.7, ratingCount: 14532, year: 1813, pages: 432,
+    synopsis: "Dinamika kecerdasan Elizabeth Bennet dan keteguhan Fitzwilliam Darcy dalam mengikis prasangka kelas sosial Inggris abad ke-19.",
+    isbn: "978-0-14-143951-8", publisher: "Penguin Classics", language: "English",
+    available: true, featured: false, tags: ["Romansa", "Inggris", "Klasik"]
+  },
+  {
+    id: 64, title: "Jane Eyre", author: "Charlotte Bronte", genre: "Romance",
+    rating: 4.6, ratingCount: 9234, year: 1847, pages: 532,
+    synopsis: "Perjalanan hidup Jane Eyre mempertahankan kemandirian prinsip dan harga dirinya sebagai pengajar di Thornfield Hall.",
+    isbn: "978-0-14-144114-6", publisher: "Penguin Classics", language: "English",
+    available: false, featured: false, tags: ["Romansa", "Gotik", "Klasik"]
+  },
+  {
+    id: 65, title: "The Fault in Our Stars", author: "John Green", genre: "Romance",
+    rating: 4.5, ratingCount: 13201, year: 2012, pages: 313,
+    synopsis: "Pertemuan Hazel Grace dan Augustus Waters yang berbagi kecintaan pada buku dan humor di tengah perjuangan medis mereka.",
+    isbn: "978-0-525-47881-2", publisher: "Dutton Books", language: "English",
+    available: true, featured: false, tags: ["Romansa", "Remaja", "Drama"]
+  },
+  {
+    id: 66, title: "It", author: "Stephen King", genre: "Horror",
+    rating: 4.6, ratingCount: 8923, year: 1986, pages: 1138,
+    synopsis: "Tujuh sahabat masa kecil di kota Derry kembali berkumpul saat dewasa untuk menepati janji menghadapi teror masa lalu.",
+    isbn: "978-1-5011-4297-0", publisher: "Scribner", language: "English",
+    available: false, featured: false, tags: ["Horror", "Persahabatan", "Psikologis"]
+  },
+  {
+    id: 67, title: "The Shining", author: "Stephen King", genre: "Horror",
+    rating: 4.7, ratingCount: 6712, year: 1977, pages: 447,
+    synopsis: "Keluarga Torrance menjaga Hotel Overlook yang terisolasi badai salju di pegunungan Colorado sepanjang musim dingin.",
+    isbn: "978-0-307-74365-7", publisher: "Anchor", language: "English",
+    available: true, featured: false, tags: ["Horror", "Psikologis", "Keluarga"]
+  },
+  {
+    id: 68, title: "A Short History of Nearly Everything", author: "Bill Bryson", genre: "Science",
+    rating: 4.7, ratingCount: 7891, year: 2003, pages: 544,
+    synopsis: "Kisah bagaimana para ilmuwan mengukur bumi, memahami usia fosil, hingga memetakan partikel subatomik secara populer.",
+    isbn: "978-0-767-90818-4", publisher: "Broadway Books", language: "English",
+    available: true, featured: false, tags: ["Sains", "Populer", "Sejarah"]
+  },
+  {
+    id: 69, title: "The Gene: An Intimate History", author: "Siddhartha Mukherjee", genre: "Science",
+    rating: 4.6, ratingCount: 3201, year: 2016, pages: 592,
+    synopsis: "Sejarah penelitian genetika dari kebun kacang Gregor Mendel hingga pemetaan genom manusia dan etika bioteknologi.",
+    isbn: "978-1-476-73350-0", publisher: "Scribner", language: "English",
+    available: true, featured: false, tags: ["Biologi", "Genetika", "Sejarah Sains"]
+  },
+  {
+    id: 70, title: "Cosmos", author: "Carl Sagan", genre: "Science",
+    rating: 4.8, ratingCount: 5892, year: 1980, pages: 365,
+    synopsis: "Penjelajahan lima belas miliar tahun evolusi kosmik yang merangkai sejarah astronomi, peradaban manusia, dan masa depan antariksa.",
+    isbn: "978-0-345-53943-4", publisher: "Ballantine Books", language: "English",
+    available: true, featured: false, tags: ["Astronomi", "Kosmologi", "Sains Populer"]
+  },
+  {
+    id: 71, title: "The Selfish Gene", author: "Richard Dawkins", genre: "Science",
+    rating: 4.5, ratingCount: 4512, year: 1976, pages: 360,
+    synopsis: "Penjelasan biologi evolusioner yang memandang seleksi alam dari kacamata replikasi gen dan kemunculan perilaku altruisme.",
+    isbn: "978-0-198-78860-7", publisher: "Oxford University Press", language: "English",
+    available: false, featured: false, tags: ["Biologi", "Evolusi", "Genetika"]
+  },
+  {
+    id: 72, title: "Rich Dad Poor Dad", author: "Robert T. Kiyosaki", genre: "Business",
+    rating: 4.4, ratingCount: 12301, year: 1997, pages: 336,
+    synopsis: "Pelajaran literasi keuangan mengenai aset, arus kas, dan kemandirian finansial melalui perbandingan dua figur ayah.",
+    isbn: "978-1-61268-019-4", publisher: "Plata Publishing", language: "English",
+    available: true, featured: false, tags: ["Keuangan", "Investasi", "Mindset"]
+  },
+  {
+    id: 73, title: "The Lean Startup", author: "Eric Ries", genre: "Business",
+    rating: 4.5, ratingCount: 6712, year: 2011, pages: 336,
+    synopsis: "Metodologi siklus bangun, ukur, dan belajar (build-measure-learn) untuk memvalidasi produk secara cepat dan hemat sumber daya.",
+    isbn: "978-0-307-88789-4", publisher: "Crown Business", language: "English",
+    available: true, featured: false, tags: ["Startup", "Metodologi", "Inovasi"]
+  },
+  {
+    id: 74, title: "Good to Great", author: "Jim Collins", genre: "Business",
+    rating: 4.6, ratingCount: 5901, year: 2001, pages: 320,
+    synopsis: "Temuan riset lima tahun mengenai faktor kepemimpinan rendah hati dan budaya disiplin yang membuat perusahaan melompat unggul.",
+    isbn: "978-0-06-662099-2", publisher: "HarperBusiness", language: "English",
+    available: false, featured: false, tags: ["Manajemen", "Strategi", "Kepemimpinan"]
+  },
+  {
+    id: 75, title: "Freakonomics", author: "Steven D. Levitt & Stephen J. Dubner", genre: "Business",
+    rating: 4.4, ratingCount: 8923, year: 2005, pages: 315,
+    synopsis: "Penerapan analisis data dan teori insentif ekonomi untuk membongkar fenomena sosial sehari-hari yang tak terduga.",
+    isbn: "978-0-06-073133-5", publisher: "William Morrow", language: "English",
+    available: true, featured: false, tags: ["Ekonomi", "Sosial", "Data"]
+  },
+  {
+    id: 76, title: "The Innovator's Dilemma", author: "Clayton Christensen", genre: "Business",
+    rating: 4.5, ratingCount: 4123, year: 1997, pages: 286,
+    synopsis: "Analisis mengapa perusahaan mapan sering kali tertinggal saat gelombang teknologi disruptif mengubah kebutuhan pasar.",
+    isbn: "978-0-06-206024-2", publisher: "Harvard Business Review Press", language: "English",
+    available: true, featured: false, tags: ["Inovasi", "Strategi", "Disrupsi"]
+  },
+  {
+    id: 77, title: "Perahu Kertas", author: "Dee Lestari", genre: "Indonesian Literature",
+    rating: 4.6, ratingCount: 2341, year: 2009, pages: 444,
+    synopsis: "Perjalanan Kugy si penulis dongeng dan Keenan si pelukis muda dalam menemukan panggilan hati dan persahabatan sejati.",
+    isbn: "978-979-22-5873-8", publisher: "Bentang Pustaka", language: "Indonesia",
+    available: true, featured: true, tags: ["Indonesia", "Romansa", "Mimpi"]
+  },
+  {
+    id: 78, title: "Negeri 5 Menara", author: "Ahmad Fuadi", genre: "Indonesian Literature",
+    rating: 4.7, ratingCount: 1892, year: 2009, pages: 423,
+    synopsis: "Kisah enam sahabat santri Pondok Madani dari berbagai penjuru Nusantara yang merajut cita-cita dunia dengan man jadda wajada.",
+    isbn: "978-979-22-4977-4", publisher: "Gramedia Pustaka Utama", language: "Indonesia",
+    available: true, featured: false, tags: ["Indonesia", "Pendidikan", "Inspirasi"]
+  },
+  {
+    id: 79, title: "Sang Pemimpi", author: "Andrea Hirata", genre: "Indonesian Literature",
+    rating: 4.6, ratingCount: 1723, year: 2006, pages: 292,
+    synopsis: "Kelanjutan Laskar Pelangi tentang perjuangan Ikal, Arai, dan Jimbron bekerja keras sambil mengejar mimpi kuliah ke Sorbonne.",
+    isbn: "978-979-3062-05-1", publisher: "Bentang Pustaka", language: "Indonesia",
+    available: true, featured: false, tags: ["Indonesia", "Pendidikan", "Persahabatan"]
+  },
+  {
+    id: 80, title: "Cantik Itu Luka", author: "Eka Kurniawan", genre: "Indonesian Literature",
+    rating: 4.7, ratingCount: 1534, year: 2002, pages: 505,
+    synopsis: "Epik keluarga Dewi Ayu di kota pelabuhan Halimunda yang memadukan sejarah kolonial hingga pascakemerdekaan dengan realisme magis.",
+    isbn: "978-602-03-1135-0", publisher: "Gramedia Pustaka Utama", language: "Indonesia",
+    available: false, featured: false, tags: ["Indonesia", "Realisme Magis", "Sejarah"]
+  }
 ];
