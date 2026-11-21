@@ -304,4 +304,158 @@ export const BOOKS_SEED: RawBookSeed[] = [
     isbn: "978-1-5011-7321-9", publisher: "Scribner", language: "English",
     available: true, featured: false, tags: ["Perang Dunia II", "Prancis", "Drama"]
   },
+  {
+    id: 38, title: "The Book Thief", author: "Markus Zusak", genre: "Historical Fiction",
+    rating: 4.8, ratingCount: 8901, year: 2005, pages: 552,
+    synopsis: "Liesel Meminger menyelamatkan buku-buku dari pembakaran dan membagikannya kepada tetangga serta pemuda yang bersembunyi di ruang bawah tanah.",
+    isbn: "978-0-375-83100-3", publisher: "Knopf", language: "English",
+    available: true, featured: true, tags: ["Perang Dunia II", "Jerman", "Sastra"]
+  },
+  {
+    id: 39, title: "Perempuan di Titik Nol", author: "Nawal El Saadawi", genre: "Historical Fiction",
+    rating: 4.5, ratingCount: 1234, year: 1975, pages: 134,
+    synopsis: "Kesaksian hidup Firdaus dari balik penjara Qanatir Mesir tentang martabat dan kebebasan seorang perempuan.",
+    isbn: "978-1-84277-053-5", publisher: "Zed Books", language: "Arabic",
+    available: false, featured: false, tags: ["Feminis", "Mesir", "Drama"]
+  },
+  {
+    id: 40, title: "Pachinko", author: "Min Jin Lee", genre: "Historical Fiction",
+    rating: 4.7, ratingCount: 4823, year: 2017, pages: 485,
+    synopsis: "Ketabahan empat generasi keluarga imigran Korea yang merantau ke Osaka Jepang sejak awal abad ke-20.",
+    isbn: "978-1-4555-6392-0", publisher: "Grand Central", language: "English",
+    available: true, featured: false, tags: ["Korea", "Jepang", "Generasi"]
+  },
+  {
+    id: 41, title: "Meditations", author: "Marcus Aurelius", genre: "Philosophy",
+    rating: 4.7, ratingCount: 9201, year: 180, pages: 254,
+    synopsis: "Catatan renungan pribadi Kaisar Romawi Marcus Aurelius mengenai disiplin diri, kebajikan Stoa, dan kefanaan hidup.",
+    isbn: "978-0-14-044933-4", publisher: "Penguin Classics", language: "Greek",
+    available: true, featured: false, tags: ["Stoikisme", "Romawi", "Filsafat Klasik"]
+  },
+  {
+    id: 42, title: "Sophie's World", author: "Jostein Gaarder", genre: "Philosophy",
+    rating: 4.5, ratingCount: 4312, year: 1991, pages: 518,
+    synopsis: "Pengantar sejarah filsafat Barat yang dikemas dalam misteri surat-surat filosofis kepada remaja bernama Sophie Amundsen.",
+    isbn: "978-0-374-53071-6", publisher: "Farrar, Straus and Giroux", language: "Norwegian",
+    available: true, featured: false, tags: ["Filsafat", "Pendidikan", "Remaja"]
+  },
+  {
+    id: 43, title: "Man's Search for Meaning", author: "Viktor E. Frankl", genre: "Philosophy",
+    rating: 4.8, ratingCount: 11203, year: 1946, pages: 165,
+    synopsis: "Pengalaman psikiater Viktor Frankl dan perumusan logoterapi bahwa manusia digerakkan oleh kehendak untuk menemukan makna.",
+    isbn: "978-0-8070-1427-1", publisher: "Beacon Press", language: "German",
+    available: true, featured: true, tags: ["Psikologi", "Logoterapi", "Makna Hidup"]
+  },
+  {
+    id: 44, title: "Thus Spoke Zarathustra", author: "Friedrich Nietzsche", genre: "Philosophy",
+    rating: 4.4, ratingCount: 3812, year: 1883, pages: 352,
+    synopsis: "Karya filosofis puitis Nietzsche tentang perjalanan Zarathustra turun dari gunung untuk mengajarkan melampaui diri manusia.",
+    isbn: "978-0-14-044118-5", publisher: "Penguin Classics", language: "German",
+    available: false, featured: false, tags: ["Eksistensialisme", "Nietzsche", "Filsafat Barat"]
+  },
+  {
+    id: 45, title: "The Stranger", author: "Albert Camus", genre: "Philosophy",
+    rating: 4.5, ratingCount: 6712, year: 1942, pages: 159,
+    synopsis: "Kisah Meursault di Aljazair yang menjadi potret klasik filsafat absurdisme tentang keterasingan manusia modern.",
+    isbn: "978-0-679-72020-1", publisher: "Vintage", language: "French",
+    available: true, featured: false, tags: ["Absurdisme", "Eksistensialisme", "Prancis"]
+  },
+  {
+    id: 46, title: "1984", author: "George Orwell", genre: "Dystopian",
+    rating: 4.7, ratingCount: 9103, year: 1949, pages: 328,
+    synopsis: "Peringatan tajam terhadap totalitarianisme, pengawasan menyeluruh Big Brother, dan manipulasi bahasa Newspeak di Oceania.",
+    isbn: "978-0-451-52493-5", publisher: "Signet Classic", language: "English",
+    available: true, featured: false, tags: ["Distopia", "Politik", "Klasik"]
+  },
+  {
+    id: 47, title: "The Handmaid's Tale", author: "Margaret Atwood", genre: "Dystopian",
+    rating: 4.6, ratingCount: 7234, year: 1985, pages: 311,
+    synopsis: "Kehidupan Offred di Republik Gilead ketika hak-hak warga dirampas atas nama ketertiban rezim ekstrem.",
+    isbn: "978-0-385-49081-8", publisher: "McClelland and Stewart", language: "English",
+    available: true, featured: false, tags: ["Distopia", "Feminis", "Amerika"]
+  },
+  {
+    id: 48, title: "Lord of the Flies", author: "William Golding", genre: "Dystopian",
+    rating: 4.3, ratingCount: 5891, year: 1954, pages: 224,
+    synopsis: "Sekelompok anak sekolah yang terdampar di pulau tak berpenghuni mencoba mengatur diri sendiri namun jatuh ke dalam konflik.",
+    isbn: "978-0-399-50148-7", publisher: "Perigee", language: "English",
+    available: false, featured: false, tags: ["Alegori", "Survival", "Klasik"]
+  },
+  {
+    id: 49, title: "Clean Code", author: "Robert C. Martin", genre: "Technology",
+    rating: 4.6, ratingCount: 5678, year: 2008, pages: 431,
+    synopsis: "Kaidah penulisan kode perangkat lunak yang rapi, mudah dibaca, teruji, dan mudah dirawat oleh tim rekayasa.",
+    isbn: "978-0-13-235088-4", publisher: "Prentice Hall", language: "English",
+    available: true, featured: false, tags: ["Pemrograman", "Software Engineering", "Best Practices"]
+  },
+  {
+    id: 50, title: "The Pragmatic Programmer", author: "David Thomas & Andrew Hunt", genre: "Technology",
+    rating: 4.7, ratingCount: 4521, year: 1999, pages: 352,
+    synopsis: "Prinsip desain modular, otomatisasi pengujian, dan kebiasaan berpikir pengembang perangkat lunak profesional.",
+    isbn: "978-0-13-595705-9", publisher: "Addison-Wesley", language: "English",
+    available: true, featured: false, tags: ["Pemrograman", "Karir", "Filosofi Kode"]
+  },
+  {
+    id: 51, title: "You Don't Know JS Yet", author: "Kyle Simpson", genre: "Technology",
+    rating: 4.8, ratingCount: 3901, year: 2014, pages: 278,
+    synopsis: "Kupas tuntas mekanisme inti bahasa JavaScript mulai dari lexical scope, closure, prototype, hingga asinkronisitas.",
+    isbn: "978-1-491-92446-4", publisher: "O'Reilly Media", language: "English",
+    available: true, featured: false, tags: ["JavaScript", "Web Development", "Pemrograman"]
+  },
+  {
+    id: 52, title: "Designing Data-Intensive Applications", author: "Martin Kleppmann", genre: "Technology",
+    rating: 4.9, ratingCount: 3123, year: 2017, pages: 616,
+    synopsis: "Arsitektur basis data modern, replikasi, partisi, konsistensi transaksi, dan pemrosesan aliran data berskala besar.",
+    isbn: "978-1-449-37332-0", publisher: "O'Reilly Media", language: "English",
+    available: false, featured: false, tags: ["Database", "Sistem Terdistribusi", "Big Data"]
+  },
+  {
+    id: 53, title: "The Algorithm Design Manual", author: "Steven Skiena", genre: "Technology",
+    rating: 4.6, ratingCount: 2341, year: 1997, pages: 730,
+    synopsis: "Katalog teknik perancangan algoritma dan struktur data disertai studi kasus pemecahan masalah komputasi nyata.",
+    isbn: "978-1-848-00069-8", publisher: "Springer", language: "English",
+    available: true, featured: false, tags: ["Algoritma", "Pemrograman", "Ilmu Komputer"]
+  },
+  {
+    id: 54, title: "Gone Girl", author: "Gillian Flynn", genre: "Mystery",
+    rating: 4.5, ratingCount: 8934, year: 2012, pages: 422,
+    synopsis: "Hilangnya Amy Dunne secara misterius di hari ulang tahun pernikahannya menguak sisi gelap kehidupan rumah tangga Nick.",
+    isbn: "978-0-307-58837-1", publisher: "Crown", language: "English",
+    available: true, featured: false, tags: ["Misteri", "Psikologis", "Thriller"]
+  },
+  {
+    id: 55, title: "The Girl with the Dragon Tattoo", author: "Stieg Larsson", genre: "Mystery",
+    rating: 4.6, ratingCount: 7823, year: 2005, pages: 644,
+    synopsis: "Jurnalis Mikael Blomkvist dan penyelidik siber Lisbeth Salander menelusuri kasus hilangnya anggota keluarga Vanger di Swedia.",
+    isbn: "978-0-307-45454-6", publisher: "Knopf", language: "Swedish",
+    available: false, featured: false, tags: ["Misteri", "Swedia", "Kriminal"]
+  },
+  {
+    id: 56, title: "And Then There Were None", author: "Agatha Christie", genre: "Mystery",
+    rating: 4.7, ratingCount: 11203, year: 1939, pages: 264,
+    synopsis: "Sepuluh orang asing diundang ke Pulau Soldier dan harus memecahkan teka-teki siapa sosok pengundang mereka yang sebenarnya.",
+    isbn: "978-0-06-207348-8", publisher: "HarperCollins", language: "English",
+    available: true, featured: false, tags: ["Misteri", "Detektif", "Klasik"]
+  },
+  {
+    id: 57, title: "The Da Vinci Code", author: "Dan Brown", genre: "Mystery",
+    rating: 4.3, ratingCount: 14201, year: 2003, pages: 454,
+    synopsis: "Profesor simbologi Robert Langdon dan kriptolog Sophie Neveu memecahkan sandi tersembunyi di balik karya lukisan klasik.",
+    isbn: "978-0-385-50420-1", publisher: "Doubleday", language: "English",
+    available: true, featured: false, tags: ["Misteri", "Sejarah", "Simbologi"]
+  },
+  {
+    id: 58, title: "Big Little Lies", author: "Liane Moriarty", genre: "Mystery",
+    rating: 4.5, ratingCount: 5612, year: 2014, pages: 460,
+    synopsis: "Persahabatan tiga ibu di kota pesisir Australia yang menyimpan rahasia rumit di balik kehidupan keluarga yang tampak sempurna.",
+    isbn: "978-1-250-06979-5", publisher: "Flatiron Books", language: "English",
+    available: true, featured: false, tags: ["Misteri", "Drama", "Keluarga"]
+  },
+  {
+    id: 59, title: "Steve Jobs", author: "Walter Isaacson", genre: "Biography",
+    rating: 4.6, ratingCount: 8901, year: 2011, pages: 630,
+    synopsis: "Biografi komprehensif pendiri Apple berdasarkan lebih dari empat puluh wawancara langsung mengenai desain dan inovasi produk.",
+    isbn: "978-1-4516-4853-9", publisher: "Simon & Schuster", language: "English",
+    available: true, featured: false, tags: ["Biografi", "Teknologi", "Kepemimpinan"]
+  },
 ];
