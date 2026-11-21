@@ -7,6 +7,58 @@ import bcrypt from "bcryptjs";
 import { prisma } from "./db";
 
 export const SESSION_COOKIE_NAME = "charv_session";
+export const RESET_TOKEN_COOKIE_NAME = "charv_reset_token";
+
+export function hashOtpCode(code: string): string {
+  return crypto.createHash("sha256").update(`${code.trim()}:charv_otp_salt`).digest("hex");
+}
+
+export async function setResetPasswordTokenCookie(email: string, otpId: number): Promise<void> {
+  const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
+  const jwt = await new SignJWT({
+    email: email.toLowerCase(),
+    otpId,
+    purpose: "password_reset_verified",
+  })
+    .setProtectedHeader({ alg: "HS256" })
+    .setIssuedAt()
+    .setExpirationTime("10m")
+    .sign(getSecretKey());
+
+  const cookieStore = await cookies();
+  cookieStore.set(RESET_TOKEN_COOKIE_NAME, jwt, {
+    httpOnly: true,
+    sameSite: "lax",
+    path: "/",
+    expires: expiresAt,
+  });
+}
+
+export async function verifyAndConsumeResetPasswordTokenCookie(): Promise<{
+  email: string;
+  otpId: number;
+} | null> {
+  try {
+    const cookieStore = await cookies();
+    const raw = cookieStore.get(RESET_TOKEN_COOKIE_NAME)?.value;
+    if (!raw) return null;
+
+    const { payload } = await jwtVerify(raw, getSecretKey());
+    if (
+      payload.purpose !== "password_reset_verified" ||
+      typeof payload.email !== "string" ||
+      typeof payload.otpId !== "number"
+    ) {
+      return null;
+    }
+
+    cookieStore.delete(RESET_TOKEN_COOKIE_NAME);
+    return { email: payload.email, otpId: payload.otpId };
+  } catch {
+    return null;
+  }
+}
+
 function getSecretKey(): Uint8Array {
   const secret = process.env.SESSION_SECRET;
   if (!secret || secret.length < 16) {
