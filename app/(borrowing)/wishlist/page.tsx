@@ -2,12 +2,17 @@ import Link from "next/link";
 import {
   Heart,
   ShoppingBag,
+  Sparkles,
   AlertCircle,
+  CheckCircle2,
   PlusCircle,
+  Star,
 } from "lucide-react";
 import { prisma } from "@/lib/db";
 import { requireAuth } from "@/lib/auth";
 import { PageHeader } from "@/components/layout/PageHeader";
+import { GeneratedBookCover } from "@/components/books/GeneratedBookCover";
+import { EmptyState } from "@/components/ui/EmptyState";
 import {
   addBookToWishlistFormAction,
 } from "@/features/borrowing/actions";
@@ -46,6 +51,7 @@ const PRIORITY_META: Record<
 export default async function WishlistPage({ searchParams }: WishlistPageProps) {
   const user = await requireAuth("/wishlist");
   const resolvedParams = await searchParams;
+  const activePriority = resolvedParams.priority || "all";
   const errorMsg = resolvedParams.error;
 
   const allWishlists = await prisma.wishlist.findMany({
@@ -73,6 +79,11 @@ export default async function WishlistPage({ searchParams }: WishlistPageProps) 
     return b.createdAt.getTime() - a.createdAt.getTime();
   });
 
+  const filteredWishlists =
+    activePriority === "all"
+      ? sortedWishlists
+      : sortedWishlists.filter((item) => item.priority === activePriority);
+
   const wishlistBookIds = allWishlists.map((w) => w.bookId);
   const catalogCandidates = await prisma.book.findMany({
     where:
@@ -88,6 +99,11 @@ export default async function WishlistPage({ searchParams }: WishlistPageProps) 
       stockAvailable: true,
     },
   });
+
+  const highPriorityCount = allWishlists.filter((w) => w.priority === "high").length;
+  const readyToBorrowCount = allWishlists.filter(
+    (w) => w.book.stockAvailable > 0
+  ).length;
 
   return (
     <div className="min-h-screen pb-16">
@@ -118,8 +134,206 @@ export default async function WishlistPage({ searchParams }: WishlistPageProps) 
             <span>{errorMsg}</span>
           </div>
         )}
+
+        <section
+          aria-label="Ringkasan Daftar Keinginan"
+          className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-3"
+        >
+          <div className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-4 shadow-xs">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-semibold tracking-wider uppercase text-[var(--fg-muted)]">
+                Total Buku Incaran
+              </span>
+              <Heart className="h-4 w-4 text-rose-600" />
+            </div>
+            <p className="mt-2 font-heading text-2xl font-bold text-[var(--fg)]">
+              {allWishlists.length} Judul
+            </p>
+            <p className="mt-1 text-xs text-[var(--fg-muted)]">
+              Tersimpan di akun {user.name}
+            </p>
+          </div>
+
+          <div className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-4 shadow-xs">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-semibold tracking-wider uppercase text-[var(--fg-muted)]">
+                Prioritas Tinggi
+              </span>
+              <Sparkles className="h-4 w-4 text-amber-600" />
+            </div>
+            <p className="mt-2 font-heading text-2xl font-bold text-[var(--fg)]">
+              {highPriorityCount} Judul
+            </p>
+            <p className="mt-1 text-xs text-[var(--fg-muted)]">
+              Target baca utama semester ini
+            </p>
+          </div>
+
+          <div className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-4 shadow-xs">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-semibold tracking-wider uppercase text-[var(--fg-muted)]">
+                Siap Dipinjam Sekarang
+              </span>
+              <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+            </div>
+            <p className="mt-2 font-heading text-2xl font-bold text-emerald-700 dark:text-emerald-400">
+              {readyToBorrowCount} Judul
+            </p>
+            <p className="mt-1 text-xs text-[var(--fg-muted)]">
+              Stok fisik tersedia di rak perpustakaan
+            </p>
+          </div>
+        </section>
+
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
           <div className="lg:col-span-2">
+            <div className="mb-5 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[var(--border)] bg-[var(--surface)]/70 p-3">
+              <div className="flex flex-wrap items-center gap-2">
+                {[
+                  { key: "all", label: `Semua (${allWishlists.length})` },
+                  {
+                    key: "high",
+                    label: `Prioritas Tinggi (${
+                      allWishlists.filter((i) => i.priority === "high").length
+                    })`,
+                  },
+                  {
+                    key: "normal",
+                    label: `Normal (${
+                      allWishlists.filter((i) => i.priority === "normal").length
+                    })`,
+                  },
+                  {
+                    key: "low",
+                    label: `Santai (${
+                      allWishlists.filter((i) => i.priority === "low").length
+                    })`,
+                  },
+                ].map((tab) => {
+                  const isActive = activePriority === tab.key;
+                  return (
+                    <Link
+                      key={tab.key}
+                      href={
+                        tab.key === "all"
+                          ? "/wishlist"
+                          : `/wishlist?priority=${tab.key}`
+                      }
+                      className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors ${
+                        isActive
+                          ? "bg-[#92400E] text-white"
+                          : "bg-[var(--card)] text-[var(--fg-muted)] hover:text-[var(--fg)]"
+                      }`}
+                    >
+                      {tab.label}
+                    </Link>
+                  );
+                })}
+              </div>
+              <Link
+                href="/recommendations"
+                className="text-xs font-semibold text-[#92400E] hover:underline dark:text-amber-400"
+              >
+                Lihat Rekomendasi Personal &rarr;
+              </Link>
+            </div>
+
+            {filteredWishlists.length === 0 ? (
+              <EmptyState
+                title="Daftar Keinginan Masih Kosong"
+                description="Anda belum menyimpan buku pada kategori prioritas ini. Jelajahi katalog atau tambahkan buku melalui formulir cepat di samping."
+                actionLabel="Jelajahi Katalog Buku"
+                actionHref="/explore"
+                secondaryActionLabel="Lihat Rekomendasi"
+                secondaryActionHref="/recommendations"
+              />
+            ) : (
+              <div className="space-y-4">
+                {filteredWishlists.map((item) => {
+                  const primaryAuthor =
+                    item.book.authors[0]?.author.name || "Penulis Koleksi";
+                  const primaryCategory =
+                    item.book.categories[0]?.category.name || "Literatur";
+                  const accentColor =
+                    item.book.categories[0]?.category.accentColor || "#92400E";
+                  const priorityInfo =
+                    PRIORITY_META[item.priority] || PRIORITY_META.normal;
+                  const isAvailable = item.book.stockAvailable > 0;
+
+                  return (
+                    <article
+                      key={item.id}
+                      className="rounded-2xl border border-[var(--border)] bg-[var(--card)] p-4 shadow-xs transition-shadow hover:shadow-md sm:p-5"
+                    >
+                      <div className="flex flex-col gap-4 sm:flex-row">
+                        <div className="w-28 shrink-0 sm:w-32">
+                          <Link href={`/books/${item.book.id}`} className="block">
+                            <GeneratedBookCover
+                              title={item.book.title}
+                              author={primaryAuthor}
+                              category={primaryCategory}
+                              accentColor={accentColor}
+                              coverPath={item.book.coverPath}
+                              publishYear={item.book.publishYear}
+                              className="w-full aspect-[2/3]"
+                            />
+                          </Link>
+                        </div>
+
+                        <div className="flex flex-1 flex-col justify-between">
+                          <div>
+                            <div className="flex flex-wrap items-center justify-between gap-2">
+                              <span
+                                className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold ${priorityInfo.badgeClass}`}
+                              >
+                                {priorityInfo.label}
+                              </span>
+
+                              <span
+                                className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${
+                                  isAvailable
+                                    ? "bg-emerald-100 text-emerald-900 dark:bg-emerald-950/70 dark:text-emerald-200"
+                                    : "bg-red-100 text-red-900 dark:bg-red-950/70 dark:text-red-200"
+                                }`}
+                              >
+                                {isAvailable
+                                  ? `Stok Tersedia (${item.book.stockAvailable}/${item.book.stockTotal})`
+                                  : "Stok Sedang Dipinjam"}
+                              </span>
+                            </div>
+
+                            <h2 className="mt-2 font-heading text-lg font-bold text-[var(--fg)] hover:text-[#92400E]">
+                              <Link href={`/books/${item.book.id}`}>
+                                {item.book.title}
+                              </Link>
+                            </h2>
+
+                            <p className="mt-0.5 text-xs text-[var(--fg-muted)]">
+                              Oleh{" "}
+                              <span className="font-medium text-[var(--fg)]">
+                                {primaryAuthor}
+                              </span>{" "}
+                              &bull; {item.book.publisher.name} ({item.book.publishYear})
+                              &bull; {item.book.pages} hlm
+                            </p>
+
+                            <div className="mt-1.5 flex items-center gap-3 text-xs text-[var(--fg-muted)]">
+                              <span className="inline-flex items-center gap-1 font-semibold text-amber-700 dark:text-amber-300">
+                                <Star className="h-3.5 w-3.5 fill-amber-500 text-amber-500" />
+                                {item.book.ratingAvg.toFixed(1)} ({item.book.ratingCount}{" "}
+                                ulasan)
+                              </span>
+                              <span>ISBN: {item.book.isbn}</span>
+                            </div>
+
+                          </div>
+                        </div>
+                      </div>
+                    </article>
+                  );
+                })}
+              </div>
+            )}
           </div>
 
           <aside className="space-y-6">
