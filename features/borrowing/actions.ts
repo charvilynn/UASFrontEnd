@@ -368,3 +368,114 @@ export async function returnLoanItemAction(formData: FormData): Promise<void> {
   revalidatePath("/", "layout");
   redirect(`/borrow/returns?status=returned&code=${encodeURIComponent(loan.loanCode)}`);
 }
+
+export async function extendLoanItemAction(formData: FormData): Promise<void> {
+  const user = await requireAuth("/borrow/returns");
+  const loanId = Number(formData.get("loanId"));
+
+  if (!loanId) return;
+
+  const loan = await prisma.loan.findFirst({
+    where: { id: loanId, userId: user.id },
+    include: { book: true },
+  });
+
+  if (!loan || loan.status === "returned") {
+    redirect("/borrow/returns?error=Peminjaman+sudah+dikembalikan");
+  }
+
+  if (loan.extendedCount >= 2) {
+    redirect("/borrow/returns?error=Batas+maksimal+perpanjangan+2+kali+telah+tercapai");
+  }
+
+  const newDueDate = new Date(loan.dueDate.getTime() + 7 * 24 * 60 * 60 * 1000);
+
+  await prisma.loan.update({
+    where: { id: loan.id },
+    data: {
+      dueDate: newDueDate,
+      extendedCount: { increment: 1 },
+      status: newDueDate > new Date() ? "borrowed" : loan.status,
+    },
+  });
+
+  revalidatePath("/borrow/returns");
+  revalidatePath("/account/borrowed");
+  redirect(`/borrow/returns?status=extended&code=${encodeURIComponent(loan.loanCode)}`);
+}
+
+export async function submitReviewAction(formData: FormData): Promise<void> {
+  const user = await requireAuth("/reviews");
+  const bookId = Number(formData.get("bookId"));
+  const rawRating = Number(formData.get("rating"));
+  const title = String(formData.get("title") || "").trim();
+  const comment = String(formData.get("comment") || "").trim();
+  const spoiler =
+    formData.get("spoiler") === "on" || formData.get("spoiler") === "true";
+
+  if (!bookId || !title || !comment) {
+    redirect("/reviews?error=Harap+lengkapi+judul+dan+isi+ulasan+Anda");
+  }
+
+  const rating = Math.min(5, Math.max(1, Math.round(rawRating || 5)));
+
+  await prisma.$transaction(async (tx) => {
+    await tx.review.upsert({
+      where: {
+        userId_bookId: {
+          userId: user.id,
+          bookId,
+        },
+      },
+      update: {
+        rating,
+        title,
+        comment,
+        spoiler,
+      },
+      create: {
+        userId: user.id,
+        bookId,
+        rating,
+        title,
+        comment,
+        spoiler,
+      },
+    });
+
+    const stats = await tx.review.aggregate({
+      where: { bookId },
+      _avg: { rating: true },
+      _count: { rating: true },
+    });
+
+    const avg = stats._avg.rating ? Number(stats._avg.rating.toFixed(2)) : rating;
+    const count = stats._count.rating || 1;
+
+    await tx.book.update({
+      where: { id: bookId },
+      data: {
+        ratingAvg: avg,
+        ratingCount: count,
+      },
+    });
+  });
+
+  revalidatePath("/reviews");
+  revalidatePath(`/books/${bookId}`);
+  redirect("/reviews?submitted=1");
+}
+
+export async function markReviewHelpfulAction(formData: FormData): Promise<void> {
+  const reviewId = Number(formData.get("reviewId"));
+  if (!reviewId) return;
+
+  await prisma.review.update({
+    where: { id: reviewId },
+    data: {
+      helpfulCount: { increment: 1 },
+    },
+  });
+
+  revalidatePath("/reviews");
+}
