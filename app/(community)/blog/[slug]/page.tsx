@@ -2,13 +2,19 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import {
   Clock,
+  MessageSquare,
   Calendar,
+  UserCheck,
+  Send,
   BookOpen,
+  ArrowRight,
+  CheckCircle2,
   Sparkles,
 } from "lucide-react";
 import { prisma } from "@/lib/db";
 import { getSessionUser } from "@/lib/auth";
 import { PageHeader } from "@/components/layout/PageHeader";
+import { addBlogCommentAction } from "@/features/community/actions";
 
 interface BlogDetailPageProps {
   params: Promise<{ slug: string }>;
@@ -175,6 +181,150 @@ export default async function BlogDetailPage({
                 </div>
               </div>
             </article>
+
+            <section
+              id="komentar"
+              aria-label="Diskusi dan Komentar Pembaca"
+              className="mt-8 rounded-2xl border border-[var(--border)] bg-[var(--card)] p-6 shadow-xs sm:p-8"
+            >
+              <div className="mb-6 flex items-center justify-between gap-2">
+                <div>
+                  <h2 className="font-heading flex items-center gap-2 text-xl font-bold text-[var(--fg)]">
+                    <MessageSquare className="h-5 w-5 text-[#92400E]" />
+                    Diskusi & Tanggapan Pembaca ({post.comments.length})
+                  </h2>
+                  <p className="mt-1 text-xs text-[var(--fg-muted)]">
+                    Bagikan pandangan akademik, kutipan favorit, atau rekomendasi
+                    bacaan tambahan.
+                  </p>
+                </div>
+              </div>
+
+              {resolvedSearch.commentSuccess === "1" && (
+                <div
+                  role="status"
+                  className="mb-5 flex items-center gap-2 rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-3.5 text-xs font-semibold text-emerald-800 dark:text-emerald-300"
+                >
+                  <CheckCircle2 className="h-4 w-4 shrink-0" />
+                  Komentar Anda berhasil diterbitkan ke diskusi artikel ini.
+                </div>
+              )}
+
+              {!sessionUser ? (
+                <div className="mb-8 flex flex-wrap items-center justify-between gap-4 rounded-xl border border-[var(--border)] bg-[var(--surface)]/70 p-4">
+                  <div>
+                    <p className="text-xs font-semibold text-[var(--fg)]">
+                      Masuk Akun untuk Berdiskusi
+                    </p>
+                    <p className="mt-0.5 text-xs text-[var(--fg-muted)]">
+                      Silakan masuk menggunakan akun Anda untuk mengirim tanggapan atau komentar pada artikel ini.
+                    </p>
+                  </div>
+                  <Link
+                    href={`/login?next=${encodeURIComponent(`/blog/${post.slug}`)}`}
+                    className="inline-flex items-center gap-1.5 rounded-lg bg-[#92400E] px-4 py-2 text-xs font-semibold text-white transition-colors hover:bg-[#78350F]"
+                  >
+                    <span>Masuk Akun</span>
+                    <ArrowRight className="h-3.5 w-3.5" />
+                  </Link>
+                </div>
+              ) : (
+                <form
+                  action={addBlogCommentAction}
+                  className="mb-8 rounded-xl border border-[var(--border)] bg-[var(--surface)]/70 p-4"
+                >
+                  <input type="hidden" name="postId" value={post.id} />
+                  <input type="hidden" name="slug" value={post.slug} />
+
+                  <div className="mb-3 flex flex-wrap items-center justify-between gap-2 text-xs">
+                    <span className="inline-flex items-center gap-1.5 font-semibold text-[var(--fg)]">
+                      <UserCheck className="h-4 w-4 text-[#92400E]" />
+                      {`Masuk sebagai: ${sessionUser.name} (${sessionUser.memberCode})`}
+                    </span>
+                  </div>
+
+                  <label
+                    htmlFor="blog-comment-input"
+                    className="sr-only"
+                  >
+                    Tulis komentar Anda
+                  </label>
+                  <textarea
+                    id="blog-comment-input"
+                    name="content"
+                    rows={3}
+                    required
+                    placeholder="Tulis tanggapan, analisis singkat, atau pertanyaan diskusi..."
+                    className="w-full rounded-lg border border-[var(--border)] bg-[var(--card)] p-3 text-sm text-[var(--fg)] placeholder:text-[var(--fg-muted)] focus:border-[#92400E]"
+                  />
+
+                  <div className="mt-3 flex justify-end">
+                    <button
+                      type="submit"
+                      className="inline-flex items-center gap-1.5 rounded-lg bg-[#92400E] px-4 py-2 text-xs font-semibold text-white transition-colors hover:bg-[#78350F]"
+                    >
+                      <Send className="h-3.5 w-3.5" />
+                      Kirim Komentar
+                    </button>
+                  </div>
+                </form>
+              )}
+
+              {post.comments.length === 0 ? (
+                <div className="rounded-xl border border-dashed border-[var(--border)] p-6 text-center text-sm text-[var(--fg-muted)]">
+                  Belum ada tanggapan pada artikel ini. Jadilah pembaca pertama
+                  yang memulai diskusi!
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {post.comments.map((comment) => {
+                    const commentDate = new Date(
+                      comment.createdAt
+                    ).toLocaleDateString("id-ID", {
+                      day: "numeric",
+                      month: "short",
+                      year: "numeric",
+                    });
+
+                    return (
+                      <div
+                        key={comment.id}
+                        className="rounded-xl border border-[var(--border)] bg-[var(--surface)]/40 p-4"
+                      >
+                        <div className="flex items-center justify-between gap-2">
+                          <div className="flex items-center gap-2.5">
+                            <span
+                              className="flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold text-white"
+                              style={{
+                                backgroundColor:
+                                  comment.user.avatarColor || "#92400E",
+                              }}
+                            >
+                              {comment.user.name.charAt(0).toUpperCase()}
+                            </span>
+                            <div>
+                              <p className="text-xs font-bold text-[var(--fg)]">
+                                {comment.user.name}
+                              </p>
+                              <p className="text-[11px] text-[var(--fg-muted)]">
+                                {comment.user.faculty || "Anggota Charvlibrary"}{" "}
+                                &bull; {comment.user.memberCode}
+                              </p>
+                            </div>
+                          </div>
+                          <span className="text-[11px] text-[var(--fg-muted)]">
+                            {commentDate}
+                          </span>
+                        </div>
+                        <p className="mt-2.5 text-sm leading-relaxed text-[var(--fg)]">
+                          {comment.content}
+                        </p>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </section>
           </main>
 
         </div>
