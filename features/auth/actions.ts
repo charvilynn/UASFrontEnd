@@ -485,3 +485,157 @@ export async function saveOnboardingAction(formData: FormData): Promise<void> {
   revalidatePath("/recommendations");
   redirect("/");
 }
+
+export async function changePasswordAction(formData: FormData): Promise<void> {
+  const sessionUser = await requireAuth("/account/security");
+
+  const currentPassword = String(formData.get("currentPassword") || "");
+  const newPassword = String(formData.get("newPassword") || "");
+  const confirmPassword = String(formData.get("confirmPassword") || "");
+
+  if (!currentPassword || !newPassword) {
+    redirect(
+      "/account/security?error=" +
+        encodeURIComponent("Kata sandi saat ini dan kata sandi baru wajib diisi."),
+    );
+  }
+
+  if (newPassword.length < 8) {
+    redirect(
+      "/account/security?error=" +
+        encodeURIComponent("Kata sandi baru minimal terdiri dari 8 karakter."),
+    );
+  }
+
+  if (confirmPassword && newPassword !== confirmPassword) {
+    redirect(
+      "/account/security?error=" + encodeURIComponent("Konfirmasi kata sandi baru tidak cocok."),
+    );
+  }
+
+  const dbUser = await prisma.user.findUnique({
+    where: { id: sessionUser.id },
+  });
+
+  if (!dbUser) {
+    redirect("/login");
+  }
+
+  const isCurrentValid = await verifyPassword(currentPassword, dbUser.passwordHash);
+
+  if (!isCurrentValid) {
+    await prisma.loginHistory.create({
+      data: {
+        userId: dbUser.id,
+        email: dbUser.email,
+        status: "failed",
+        ipAddress: "127.0.0.1",
+        userAgent: "Pengaturan Keamanan Akun",
+        reason: "Gagal mengubah kata sandi: kata sandi lama tidak sesuai",
+      },
+    });
+    redirect(
+      "/account/security?error=" +
+        encodeURIComponent("Kata sandi saat ini yang Anda masukkan tidak sesuai."),
+    );
+  }
+
+  const newHash = await hashPassword(newPassword);
+
+  await prisma.user.update({
+    where: { id: dbUser.id },
+    data: { passwordHash: newHash },
+  });
+
+  await prisma.userSession.deleteMany({
+    where: {
+      userId: dbUser.id,
+      token: { not: sessionUser.sessionToken },
+    },
+  });
+
+  await prisma.loginHistory.create({
+    data: {
+      userId: dbUser.id,
+      email: dbUser.email,
+      status: "success",
+      ipAddress: "127.0.0.1",
+      userAgent: "Pengaturan Keamanan Akun",
+      reason: "Kata sandi akun berhasil diperbarui oleh pengguna",
+    },
+  });
+
+  revalidatePath("/account/security");
+  revalidatePath("/account/sessions");
+  revalidatePath("/account/login-history");
+  redirect("/account/security?updated=password");
+}
+
+export async function revokeSessionAction(formData: FormData): Promise<void> {
+  const sessionUser = await requireAuth("/account/sessions");
+  const sessionId = Number(formData.get("sessionId") || 0);
+  const returnTo = String(formData.get("returnTo") || "/account/sessions");
+
+  if (sessionId > 0) {
+    await prisma.userSession.deleteMany({
+      where: {
+        id: sessionId,
+        userId: sessionUser.id,
+      },
+    });
+  }
+
+  revalidatePath("/account/security");
+  revalidatePath("/account/sessions");
+  redirect(`${returnTo.startsWith("/account/") ? returnTo : "/account/sessions"}?updated=session`);
+}
+
+export async function revokeOtherSessionsAction(): Promise<void> {
+  const sessionUser = await requireAuth("/account/sessions");
+
+  await prisma.userSession.deleteMany({
+    where: {
+      userId: sessionUser.id,
+      token: { not: sessionUser.sessionToken },
+    },
+  });
+
+  revalidatePath("/account/security");
+  revalidatePath("/account/sessions");
+  redirect("/account/sessions?updated=all_other");
+}
+
+export async function saveUserPreferencesAction(formData: FormData): Promise<void> {
+  const sessionUser = await requireAuth("/account/preferences");
+
+  const rawCategoryIds = formData.getAll("categoryIds");
+  const categoryIds = rawCategoryIds
+    .map((val) => Number(val))
+    .filter((id) => Number.isInteger(id) && id > 0);
+
+  const avatarColor = String(formData.get("avatarColor") || "").trim() || sessionUser.avatarColor;
+
+  await prisma.userPreference.deleteMany({
+    where: { userId: sessionUser.id },
+  });
+
+  if (categoryIds.length > 0) {
+    const uniqueIds = Array.from(new Set(categoryIds));
+    await prisma.userPreference.createMany({
+      data: uniqueIds.map((categoryId) => ({
+        userId: sessionUser.id,
+        categoryId,
+      })),
+    });
+  }
+
+  await prisma.user.update({
+    where: { id: sessionUser.id },
+    data: { avatarColor },
+  });
+
+  revalidatePath("/", "layout");
+  revalidatePath("/account/preferences");
+  revalidatePath("/recommendations");
+  redirect("/account/preferences?saved=1");
+}
