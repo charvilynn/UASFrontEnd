@@ -8,7 +8,9 @@ import {
   createSession,
   hashOtpCode,
   hashPassword,
+  requireAuth,
   setResetPasswordTokenCookie,
+  verifyAndConsumeResetPasswordTokenCookie,
   verifyPassword,
 } from "@/lib/auth";
 
@@ -334,4 +336,152 @@ export async function verifyPasswordResetOtpAction(
   await setResetPasswordTokenCookie(email, latestOtp.id);
 
   return { ok: true };
+}
+
+export interface CompletePasswordResetResult {
+  ok: boolean;
+  error?: string;
+  redirectTo?: string;
+}
+
+export async function completePasswordResetAction(
+  newPassword: string,
+  confirmPassword: string,
+): Promise<CompletePasswordResetResult> {
+  if (!newPassword || newPassword.length < 8) {
+    return {
+      ok: false,
+      error: "Password baru minimal harus terdiri dari 8 karakter.",
+    };
+  }
+
+  if (newPassword !== confirmPassword) {
+    return {
+      ok: false,
+      error: "Konfirmasi password baru tidak cocok.",
+    };
+  }
+
+  const tokenData = await verifyAndConsumeResetPasswordTokenCookie();
+  if (!tokenData) {
+    return {
+      ok: false,
+      error:
+        "Sesi verifikasi OTP tidak ditemukan atau telah kedaluwarsa. Silakan ulangi proses dari langkah pertama.",
+    };
+  }
+
+  const otpRecord = await prisma.otpCode.findUnique({
+    where: { id: tokenData.otpId },
+  });
+
+  if (!otpRecord || otpRecord.email !== tokenData.email || !otpRecord.consumedAt) {
+    return {
+      ok: false,
+      error: "Token verifikasi OTP tidak sah. Silakan minta kode baru.",
+    };
+  }
+
+  const user = await prisma.user.findUnique({
+    where: { email: tokenData.email },
+  });
+
+  if (user) {
+    const newHash = await hashPassword(newPassword);
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { passwordHash: newHash },
+    });
+
+    await prisma.userSession.deleteMany({
+      where: { userId: user.id },
+    });
+
+    await prisma.loginHistory.create({
+      data: {
+        userId: user.id,
+        email: user.email,
+        status: "success",
+        ipAddress: "127.0.0.1",
+        userAgent: "Charvlibrary Reset Password (OTP Verified)",
+        reason: "Password berhasil diperbarui melalui alur Reset Password 3 langkah",
+      },
+    });
+  }
+
+  await prisma.otpCode.deleteMany({
+    where: { email: tokenData.email },
+  });
+
+  revalidatePath("/", "layout");
+  return {
+    ok: true,
+    redirectTo: "/login?reset=1",
+  };
+}
+
+export async function saveOnboardingAction(formData: FormData): Promise<void> {
+  const user = await requireAuth("/onboarding");
+
+  const rawCategoryIds = formData.getAll("categoryIds");
+  const categoryIds = rawCategoryIds
+    .map((val) => Number(val))
+    .filter((id) => Number.isInteger(id) && id > 0);
+
+  const targetBooksRaw = Number(formData.get("targetBooks") || 12);
+  const targetBooks =
+    Number.isFinite(targetBooksRaw) && targetBooksRaw > 0
+      ? Math.min(Math.max(Math.round(targetBooksRaw), 1), 200)
+      : 12;
+
+  const targetPagesRaw = Number(formData.get("targetPages") || targetBooks * 300);
+  const targetPages =
+    Number.isFinite(targetPagesRaw) && targetPagesRaw >= 100
+      ? Math.round(targetPagesRaw)
+      : targetBooks * 300;
+
+  await prisma.userPreference.deleteMany({
+    where: { userId: user.id },
+  });
+
+  if (categoryIds.length > 0) {
+    const uniqueCategoryIds = Array.from(new Set(categoryIds));
+    await prisma.userPreference.createMany({
+      data: uniqueCategoryIds.map((categoryId) => ({
+        userId: user.id,
+        categoryId,
+      })),
+    });
+  }
+
+  await prisma.readingGoal.upsert({
+    where: {
+      userId_year: {
+        userId: user.id,
+        year: 2026,
+      },
+    },
+    update: {
+      targetBooks,
+      targetPages,
+    },
+    create: {
+      userId: user.id,
+      year: 2026,
+      targetBooks,
+      targetPages,
+      currentBooks: 0,
+      currentPages: 0,
+    },
+  });
+
+  await prisma.user.update({
+    where: { id: user.id },
+    data: { onboardingDone: true },
+  });
+
+  revalidatePath("/", "layout");
+  revalidatePath("/onboarding");
+  revalidatePath("/recommendations");
+  redirect("/");
 }
