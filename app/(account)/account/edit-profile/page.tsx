@@ -1,10 +1,14 @@
+import React from "react";
 import Link from "next/link";
 import {
   ArrowLeft,
+  CheckCircle2,
   GraduationCap,
   Palette,
   Phone,
   Save,
+  Shield,
+  Sparkles,
   User,
 } from "lucide-react";
 import { prisma } from "@/lib/db";
@@ -234,6 +238,67 @@ export default async function EditProfilePage() {
             </form>
           </div>
 
+          <div className="space-y-6 lg:col-span-4">
+            <div
+              className="rounded-2xl border border-amber-200/30 p-6 text-[#FFFBEB] shadow-md"
+              style={{
+                background: `linear-gradient(145deg, ${currentColor} 0%, #1C1410 95%)`,
+              }}
+            >
+              <p className="text-[10px] font-semibold tracking-widest uppercase text-amber-200/80">
+                Pratinjau Kartu Aktif
+              </p>
+              <h3 className="font-heading mt-1 text-lg font-bold text-white">
+                {currentName}
+              </h3>
+              <p className="mt-0.5 font-mono text-xs text-amber-300">
+                {member?.memberCode ?? sessionUser.memberCode}
+              </p>
+              <p className="mt-3 text-xs text-amber-100/90">
+                {currentFaculty || "Fakultas belum diisi"}
+              </p>
+              <p className="mt-2 line-clamp-3 text-xs text-amber-100/75">
+                {currentBio ||
+                  "Belum ada deskripsi biografi. Tambahkan catatan singkat melalui formulir di samping."}
+              </p>
+              <div className="mt-4 flex items-center gap-2 border-t border-amber-100/20 pt-3 text-[11px] text-amber-200">
+                <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400" />
+                <span>Tersimpan pada profil anggota</span>
+              </div>
+            </div>
+
+            <div className="rounded-2xl border border-[var(--border)] bg-[var(--card)] p-6 shadow-xs">
+              <h3 className="font-heading text-base font-bold text-[var(--fg)]">
+                Pengaturan Terkait Lainnya
+              </h3>
+              <ul className="mt-3 space-y-2.5 text-xs">
+                <li>
+                  <Link
+                    href="/onboarding"
+                    className="flex items-center justify-between rounded-xl border border-[var(--border)] bg-[var(--surface)]/60 p-3 font-semibold text-[var(--fg)] transition-colors hover:border-[#92400E]"
+                  >
+                    <span className="inline-flex items-center gap-2">
+                      <Sparkles className="h-4 w-4 text-[#92400E]" />
+                      Ubah Genre &amp; Minat Baca ({member?.preferences.length ?? 0})
+                    </span>
+                    <span>&rarr;</span>
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/account/security"
+                    className="flex items-center justify-between rounded-xl border border-[var(--border)] bg-[var(--surface)]/60 p-3 font-semibold text-[var(--fg)] transition-colors hover:border-[#92400E]"
+                  >
+                    <span className="inline-flex items-center gap-2">
+                      <Shield className="h-4 w-4 text-[#92400E]" />
+                      Ubah Kata Sandi &amp; Sesi Login
+                    </span>
+                    <span>&rarr;</span>
+                  </Link>
+                </li>
+              </ul>
+            </div>
+          </div>
         </div>
       </main>
     </div>
