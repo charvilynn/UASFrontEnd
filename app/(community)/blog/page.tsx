@@ -1,10 +1,13 @@
+import React from "react";
 import Link from "next/link";
 import {
   Newspaper,
   Clock,
   MessageSquare,
+  Search,
   Sparkles,
   ArrowRight,
+  UserCheck,
   BookOpen,
   Calendar,
 } from "lucide-react";
@@ -189,6 +192,177 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
           </section>
         )}
 
+        <section
+          aria-label="Filter dan Pencarian Artikel"
+          className="mb-8 rounded-xl border border-[var(--border)] bg-[var(--surface)]/80 p-4"
+        >
+          <div className="flex flex-col justify-between gap-4 lg:flex-row lg:items-center">
+            <div className="flex flex-wrap items-center gap-2">
+              <Link
+                href={query ? `/blog?q=${encodeURIComponent(query)}` : "/blog"}
+                className={`rounded-full px-3.5 py-1.5 text-xs font-semibold transition-colors ${
+                  !activeCategory
+                    ? "bg-[#92400E] text-white"
+                    : "border border-[var(--border)] bg-[var(--card)] text-[var(--fg-muted)] hover:border-[#92400E] hover:text-[var(--fg)]"
+                }`}
+              >
+                Semua Rubrik ({allPosts.length})
+              </Link>
+              {categories.map((cat) => {
+                const count = allPosts.filter((p) => p.category === cat).length;
+                const isSelected =
+                  activeCategory.toLowerCase() === cat.toLowerCase();
+                const targetHref = query
+                  ? `/blog?category=${encodeURIComponent(cat)}&q=${encodeURIComponent(query)}`
+                  : `/blog?category=${encodeURIComponent(cat)}`;
+                return (
+                  <Link
+                    key={cat}
+                    href={targetHref}
+                    className={`rounded-full px-3.5 py-1.5 text-xs font-semibold transition-colors ${
+                      isSelected
+                        ? "bg-[#92400E] text-white"
+                        : "border border-[var(--border)] bg-[var(--card)] text-[var(--fg-muted)] hover:border-[#92400E] hover:text-[var(--fg)]"
+                    }`}
+                  >
+                    {cat} ({count})
+                  </Link>
+                );
+              })}
+            </div>
+
+            <form
+              action="/blog"
+              method="get"
+              className="flex w-full items-center gap-2 lg:w-80"
+            >
+              {activeCategory && (
+                <input type="hidden" name="category" value={activeCategory} />
+              )}
+              <div className="relative flex-1">
+                <Search className="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-[var(--fg-muted)]" />
+                <input
+                  type="search"
+                  name="q"
+                  defaultValue={query}
+                  placeholder="Cari judul, topik, atau penulis..."
+                  aria-label="Cari artikel jurnal"
+                  className="w-full rounded-lg border border-[var(--border)] bg-[var(--card)] py-2 pr-3 pl-9 text-xs text-[var(--fg)] placeholder:text-[var(--fg-muted)] focus:border-[#92400E]"
+                />
+              </div>
+              <button
+                type="submit"
+                className="rounded-lg bg-[#92400E] px-3.5 py-2 text-xs font-semibold text-white transition-colors hover:bg-[#78350F]"
+              >
+                Cari
+              </button>
+              {(query || activeCategory) && (
+                <Link
+                  href="/blog"
+                  className="rounded-lg border border-[var(--border)] bg-[var(--card)] px-2.5 py-2 text-xs font-medium text-[var(--fg-muted)] hover:text-[var(--fg)]"
+                >
+                  Reset
+                </Link>
+              )}
+            </form>
+          </div>
+        </section>
+
+        {filteredPosts.length === 0 ? (
+          <div className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-10 text-center">
+            <Newspaper className="mx-auto h-10 w-10 text-[var(--fg-muted)]" />
+            <h2 className="font-heading mt-3 text-lg font-bold text-[var(--fg)]">
+              Artikel Tidak Ditemukan
+            </h2>
+            <p className="mt-1 text-sm text-[var(--fg-muted)]">
+              Tidak ada artikel jurnal yang cocok dengan kata kunci atau filter
+              kategori saat ini.
+            </p>
+            <Link
+              href="/blog"
+              className="mt-4 inline-flex items-center gap-1.5 rounded-lg bg-[#92400E] px-4 py-2 text-xs font-semibold text-white hover:bg-[#78350F]"
+            >
+              Tampilkan Semua Artikel
+            </Link>
+          </div>
+        ) : (
+          <section
+            aria-label="Daftar Artikel Jurnal"
+            className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3"
+          >
+            {filteredPosts.map((post) => {
+              const formattedDate = new Date(
+                post.publishedAt
+              ).toLocaleDateString("id-ID", {
+                day: "numeric",
+                month: "short",
+                year: "numeric",
+              });
+
+              return (
+                <article
+                  key={post.id}
+                  className="book-card-3d flex flex-col justify-between rounded-xl border border-[var(--border)] bg-[var(--card)] p-5 shadow-xs"
+                >
+                  <div>
+                    <div className="mb-3 flex flex-wrap items-center justify-between gap-2 text-xs">
+                      <span className="rounded-full bg-[#92400E]/15 px-2.5 py-0.5 font-semibold text-[#92400E] dark:text-amber-300">
+                        {post.category}
+                      </span>
+                      <div className="flex items-center gap-3 text-[var(--fg-muted)]">
+                        <span className="inline-flex items-center gap-1">
+                          <Clock className="h-3.5 w-3.5" />
+                          {post.readTimeMinutes} mnt
+                        </span>
+                        <span className="inline-flex items-center gap-1">
+                          <MessageSquare className="h-3.5 w-3.5" />
+                          {post._count.comments}
+                        </span>
+                      </div>
+                    </div>
+
+                    <h2 className="font-heading line-clamp-2 text-lg leading-snug font-bold text-[var(--fg)]">
+                      <Link
+                        href={`/blog/${post.slug}`}
+                        className="hover:text-[#92400E] dark:hover:text-amber-400"
+                      >
+                        {post.title}
+                      </Link>
+                    </h2>
+
+                    <p className="mt-2.5 line-clamp-3 text-sm leading-relaxed text-[var(--fg-muted)]">
+                      {post.excerpt}
+                    </p>
+                  </div>
+
+                  <div className="mt-5 border-t border-[var(--border)] pt-3.5">
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-2 text-xs">
+                        <UserCheck className="h-4 w-4 text-[#92400E]" />
+                        <div>
+                          <p className="font-semibold text-[var(--fg)]">
+                            {post.authorName}
+                          </p>
+                          <p className="text-[11px] text-[var(--fg-muted)]">
+                            {post.authorRole} &bull; {formattedDate}
+                          </p>
+                        </div>
+                      </div>
+
+                      <Link
+                        href={`/blog/${post.slug}`}
+                        className="inline-flex items-center gap-1 rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-1.5 text-xs font-semibold text-[var(--fg)] transition-colors hover:border-[#92400E] hover:bg-[#92400E] hover:text-white"
+                      >
+                        Baca
+                        <ArrowRight className="h-3.5 w-3.5" />
+                      </Link>
+                    </div>
+                  </div>
+                </article>
+              );
+            })}
+          </section>
+        )}
       </div>
     </div>
   );
