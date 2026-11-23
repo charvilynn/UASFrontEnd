@@ -64,9 +64,6 @@ export async function notifyAdminsBookBorrowed(
   });
 }
 
-/**
- * Mengirim notifikasi pengembalian buku ke seluruh akun pustakawan admin.
- */
 export async function notifyAdminsBookReturned(
   input: AdminReturnNotificationInput,
   db: DbClient = prisma
