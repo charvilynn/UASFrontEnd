@@ -1,5 +1,11 @@
+import React from "react";
 import Link from "next/link";
 import {
+  ShoppingBag,
+  CalendarClock,
+  Trash2,
+  ArrowRight,
+  ShieldCheck,
   AlertCircle,
   CheckCircle2,
   Heart,
@@ -10,6 +16,10 @@ import { requireAuth } from "@/lib/auth";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { GeneratedBookCover } from "@/components/books/GeneratedBookCover";
 import { EmptyState } from "@/components/ui/EmptyState";
+import {
+  updateCartDurationAction,
+  removeFromCartAction,
+} from "@/features/borrowing/actions";
 
 interface CartPageProps {
   searchParams: Promise<{
@@ -59,7 +69,9 @@ export default async function CartPage({ searchParams }: CartPageProps) {
   const availableItemsInCart = cartItems.filter(
     (item) => item.book.stockAvailable > 0
   );
+  const totalPages = cartItems.reduce((acc, item) => acc + item.book.pages, 0);
   const quotaExceeded = cartItems.length > remainingQuota;
+  const canProceedToCheckout =
     availableItemsInCart.length > 0 && remainingQuota > 0;
 
   return (
@@ -247,8 +259,79 @@ export default async function CartPage({ searchParams }: CartPageProps) {
                             {item.book.publishYear}) &bull; {item.book.pages} hlm
                           </p>
 
+                          <div className="mt-3 rounded-xl border border-[var(--border)] bg-[var(--surface)]/70 p-3">
+                            <div className="flex flex-wrap items-center justify-between gap-2">
+                              <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-[var(--fg)]">
+                                <CalendarClock className="h-4 w-4 text-[#92400E]" />
+                                Pilih Durasi Peminjaman:
+                              </span>
+                              <span className="text-xs text-[var(--fg-muted)]">
+                                Estimasi kembali:{" "}
+                                <strong className="text-[var(--fg)]">
+                                  {formatIndonesianDate(estimatedDue)}
+                                </strong>
+                              </span>
+                            </div>
+
+                            <div className="mt-2.5 flex flex-wrap items-center gap-2">
+                              {[7, 14, 21].map((days) => {
+                                const isSelected = item.durationDays === days;
+                                return (
+                                  <form
+                                    key={days}
+                                    action={updateCartDurationAction}
+                                  >
+                                    <input
+                                      type="hidden"
+                                      name="cartItemId"
+                                      value={item.id}
+                                    />
+                                    <input
+                                      type="hidden"
+                                      name="durationDays"
+                                      value={days}
+                                    />
+                                    <button
+                                      type="submit"
+                                      className={`rounded-lg border px-3 py-1.5 text-xs font-semibold transition-colors ${
+                                        isSelected
+                                          ? "border-[#92400E] bg-[#92400E] text-white"
+                                          : "border-[var(--border)] bg-[var(--card)] text-[var(--fg)] hover:border-[#92400E]"
+                                      }`}
+                                    >
+                                      {days} Hari{" "}
+                                      {days === 14 ? "(Standar)" : ""}
+                                    </button>
+                                  </form>
+                                );
+                              })}
+                            </div>
+                          </div>
                         </div>
 
+                        <div className="mt-3 flex items-center justify-between border-t border-[var(--border)] pt-3">
+                          <Link
+                            href={`/books/${item.book.id}`}
+                            className="text-xs font-semibold text-[#92400E] hover:underline dark:text-amber-400"
+                          >
+                            Lihat Detail Buku
+                          </Link>
+
+                          <form action={removeFromCartAction}>
+                            <input
+                              type="hidden"
+                              name="cartItemId"
+                              value={item.id}
+                            />
+                            <button
+                              type="submit"
+                              className="inline-flex items-center gap-1.5 rounded-lg border border-red-200 bg-red-50/70 px-3 py-1.5 text-xs font-semibold text-red-700 transition-colors hover:bg-red-100 dark:border-red-900/60 dark:bg-red-950/40 dark:text-red-300"
+                            >
+                              <Trash2 className="h-3.5 w-3.5" />
+                              <span>Keluarkan</span>
+                            </button>
+                          </form>
+                        </div>
                       </div>
                     </div>
                   </article>
@@ -257,6 +340,75 @@ export default async function CartPage({ searchParams }: CartPageProps) {
               })()}
             </div>
 
+            <aside className="space-y-5">
+              <div className="rounded-2xl border border-[var(--border)] bg-[var(--card)] p-5 shadow-xs">
+                <h2 className="font-heading text-lg font-bold text-[var(--fg)]">
+                  Ringkasan Keranjang Pinjam
+                </h2>
+                <p className="mt-1 text-xs text-[var(--fg-muted)]">
+                  Anggota: <strong>{user.name}</strong> ({user.memberCode})
+                </p>
+
+                <dl className="mt-4 space-y-2.5 border-y border-[var(--border)] py-4 text-xs">
+                  <div className="flex items-center justify-between">
+                    <dt className="text-[var(--fg-muted)]">Total Buku di Keranjang</dt>
+                    <dd className="font-semibold text-[var(--fg)]">
+                      {cartItems.length} Judul
+                    </dd>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <dt className="text-[var(--fg-muted)]">Stok Siap Dipinjam</dt>
+                    <dd className="font-semibold text-emerald-700 dark:text-emerald-400">
+                      {availableItemsInCart.length} Judul
+                    </dd>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <dt className="text-[var(--fg-muted)]">Total Halaman Bacaan</dt>
+                    <dd className="font-semibold text-[var(--fg)]">
+                      {totalPages.toLocaleString("id-ID")} Halaman
+                    </dd>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <dt className="text-[var(--fg-muted)]">Biaya Peminjaman</dt>
+                    <dd className="font-semibold text-emerald-700 dark:text-emerald-400">
+                      Gratis (Bebas Biaya)
+                    </dd>
+                  </div>
+                </dl>
+
+                {canProceedToCheckout ? (
+                  <Link
+                    href="/borrow/checkout"
+                    className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#92400E] px-4 py-3 text-sm font-semibold text-white shadow-xs transition-colors hover:bg-[#78350F]"
+                  >
+                    <ShoppingBag className="h-4 w-4" />
+                    <span>Lanjut ke Checkout Peminjaman</span>
+                    <ArrowRight className="h-4 w-4" />
+                  </Link>
+                ) : (
+                  <div className="mt-4 rounded-xl border border-amber-300 bg-amber-50 p-3 text-xs text-amber-950 dark:border-amber-800 dark:bg-amber-950/60 dark:text-amber-200">
+                    Kuota pinjam aktif Anda telah penuh atau stok buku di
+                    keranjang sedang kosong. Silakan kembalikan buku terlebih
+                    dahulu di halaman{" "}
+                    <Link
+                      href="/borrow/returns"
+                      className="font-semibold underline"
+                    >
+                      Pengembalian Mandiri
+                    </Link>
+                    .
+                  </div>
+                )}
+
+                <div className="mt-4 flex items-start gap-2 text-[11px] text-[var(--fg-muted)]">
+                  <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-[#92400E]" />
+                  <span>
+                    Setiap peminjaman dapat diperpanjang hingga 2 kali (+7 hari
+                    per perpanjangan) melalui menu Pengembalian & Perpanjangan.
+                  </span>
+                </div>
+              </div>
+            </aside>
           </div>
         )}
       </div>
