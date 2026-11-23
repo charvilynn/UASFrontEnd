@@ -1,8 +1,13 @@
+import React from "react";
 import Link from "next/link";
 import {
+  AlertTriangle,
   BookCheck,
   BookCopy,
   CalendarClock,
+  CheckCircle2,
+  Clock,
+  RefreshCw,
   RotateCcw,
   ShoppingBag,
 } from "lucide-react";
@@ -11,6 +16,10 @@ import { requireAuth } from "@/lib/auth";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { GeneratedBookCover } from "@/components/books/GeneratedBookCover";
 import { EmptyState } from "@/components/ui/EmptyState";
+import {
+  extendLoanAction,
+  returnBookAction,
+} from "@/features/account/actions";
 
 export const dynamic = "force-dynamic";
 
@@ -250,6 +259,81 @@ export default async function BorrowedBooksPage() {
                         </div>
                       </div>
 
+                      <div className="flex flex-col justify-between gap-4 border-t border-[var(--border)] pt-4 lg:w-72 lg: items-end lg:border-t-0 lg:border-l lg:pt-0 lg:pl-6">
+                        <div className="w-full rounded-xl border border-[var(--border)] bg-[var(--surface)]/70 p-3.5">
+                          <div className="flex items-center justify-between gap-2">
+                            <span className="text-[11px] font-semibold uppercase text-[var(--fg-muted)]">
+                              Hitung Mundur Tenggat
+                            </span>
+                            {isOverdue ? (
+                              <AlertTriangle className="h-4 w-4 text-red-600" />
+                            ) : (
+                              <Clock className="h-4 w-4 text-emerald-600" />
+                            )}
+                          </div>
+                          <p
+                            className={`mt-1 text-base font-bold ${
+                              isOverdue
+                                ? "text-red-700 dark:text-red-400"
+                                : daysRemaining <= 3
+                                  ? "text-amber-700 dark:text-amber-300"
+                                  : "text-emerald-700 dark:text-emerald-300"
+                            }`}
+                          >
+                            {isOverdue
+                              ? `Terlambat ${Math.abs(daysRemaining)} Hari`
+                              : daysRemaining === 0
+                                ? "Jatuh Tempo Hari Ini"
+                                : `${daysRemaining} Hari Tersisa`}
+                          </p>
+                          {isOverdue && (
+                            <p className="mt-0.5 text-[11px] text-red-600 dark:text-red-300">
+                              Harap segera kembalikan buku ke perpustakaan
+                            </p>
+                          )}
+                        </div>
+
+                        <div className="flex w-full flex-col gap-2 sm:flex-row lg:flex-col">
+                          <form action={extendLoanAction} className="w-full">
+                            <input
+                              type="hidden"
+                              name="loanId"
+                              value={loan.id}
+                            />
+                            <button
+                              type="submit"
+                              disabled={!canExtend}
+                              className={`inline-flex w-full items-center justify-center gap-2 rounded-xl border px-4 py-2.5 text-xs font-semibold transition-colors ${
+                                canExtend
+                                  ? "cursor-pointer border-[#92400E] bg-[var(--surface)] text-[#92400E] hover:bg-[#92400E] hover:text-white dark:text-amber-300"
+                                  : "cursor-not-allowed border-[var(--border)] bg-[var(--muted)] text-[var(--fg-muted)] opacity-60"
+                              }`}
+                            >
+                              <RefreshCw className="h-3.5 w-3.5" />
+                              <span>
+                                {canExtend
+                                  ? `Perpanjang 7 Hari (${loan.extendedCount}/2)`
+                                  : "Kuota Perpanjangan Habis (2/2)"}
+                              </span>
+                            </button>
+                          </form>
+
+                          <form action={returnBookAction} className="w-full">
+                            <input
+                              type="hidden"
+                              name="loanId"
+                              value={loan.id}
+                            />
+                            <button
+                              type="submit"
+                              className="inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-[#92400E] px-4 py-2.5 text-xs font-semibold text-white shadow-xs transition-colors hover:bg-[#78350F]"
+                            >
+                              <RotateCcw className="h-3.5 w-3.5" />
+                              <span>Kembalikan Buku</span>
+                            </button>
+                          </form>
+                        </div>
+                      </div>
                     </div>
                   </article>
                 );
@@ -267,6 +351,63 @@ export default async function BorrowedBooksPage() {
           )}
         </section>
 
+        {returnedLoans.length > 0 && (
+          <section
+            aria-label="Arsip Pinjaman yang Telah Dikembalikan"
+            className="rounded-2xl border border-[var(--border)] bg-[var(--card)] p-6 shadow-xs"
+          >
+            <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
+              <div>
+                <h2 className="font-heading text-lg font-bold text-[var(--fg)]">
+                  Arsip Pengembalian Sirkulasi ({returnedLoans.length})
+                </h2>
+                <p className="text-xs text-[var(--fg-muted)]">
+                  Buku yang telah selesai Anda kembalikan ke perpustakaan
+                </p>
+              </div>
+              <Link
+                href="/account/history"
+                className="text-xs font-semibold text-[#92400E] hover:underline dark:text-amber-300"
+              >
+                Tulis Refleksi di Riwayat Bacaan &rarr;
+              </Link>
+            </div>
+
+            <div className="divide-y divide-[var(--border)]">
+              {returnedLoans.slice(0, 6).map((loan) => (
+                <div
+                  key={loan.id}
+                  className="flex flex-wrap items-center justify-between gap-4 py-3.5 text-xs"
+                >
+                  <div className="flex items-center gap-3">
+                    <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-600" />
+                    <div>
+                      <Link
+                        href={`/books/${loan.book.id}`}
+                        className="font-bold text-[var(--fg)] hover:text-[#92400E]"
+                      >
+                        {loan.book.title}
+                      </Link>
+                      <p className="text-[var(--fg-muted)]">
+                        Kode: <span className="font-mono">{loan.loanCode}</span>{" "}
+                        &bull; Dipinjam{" "}
+                        {loan.borrowedAt.toLocaleDateString("id-ID")}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <span className="inline-flex items-center rounded-full bg-emerald-600/15 px-2.5 py-0.5 text-[11px] font-semibold text-emerald-700 dark:text-emerald-300">
+                      Dikembalikan{" "}
+                      {loan.returnedAt
+                        ? loan.returnedAt.toLocaleDateString("id-ID")
+                        : "Selesai"}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
       </main>
     </div>
   );
