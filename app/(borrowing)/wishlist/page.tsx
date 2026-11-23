@@ -1,7 +1,9 @@
+import React from "react";
 import Link from "next/link";
 import {
   Heart,
   ShoppingBag,
+  Trash2,
   Sparkles,
   AlertCircle,
   CheckCircle2,
@@ -14,6 +16,9 @@ import { PageHeader } from "@/components/layout/PageHeader";
 import { GeneratedBookCover } from "@/components/books/GeneratedBookCover";
 import { EmptyState } from "@/components/ui/EmptyState";
 import {
+  removeFromWishlistAction,
+  updateWishlistPriorityAction,
+  moveWishlistToCartAction,
   addBookToWishlistFormAction,
 } from "@/features/borrowing/actions";
 
@@ -326,6 +331,118 @@ export default async function WishlistPage({ searchParams }: WishlistPageProps) 
                               <span>ISBN: {item.book.isbn}</span>
                             </div>
 
+                            <form
+                              action={updateWishlistPriorityAction}
+                              className="mt-3 rounded-xl border border-[var(--border)] bg-[var(--surface)]/60 p-3"
+                            >
+                              <input
+                                type="hidden"
+                                name="wishlistId"
+                                value={item.id}
+                              />
+                              <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-3">
+                                <div>
+                                  <label
+                                    htmlFor={`priority-${item.id}`}
+                                    className="block text-[11px] font-semibold text-[var(--fg-muted)]"
+                                  >
+                                    Tingkat Prioritas
+                                  </label>
+                                  <select
+                                    id={`priority-${item.id}`}
+                                    name="priority"
+                                    defaultValue={item.priority}
+                                    className="mt-1 w-full rounded-lg border border-[var(--border)] bg-[var(--card)] px-2.5 py-1.5 text-xs font-medium text-[var(--fg)]"
+                                  >
+                                    <option value="high">Prioritas Tinggi</option>
+                                    <option value="normal">Prioritas Normal</option>
+                                    <option value="low">Prioritas Santai</option>
+                                  </select>
+                                </div>
+
+                                <div className="sm:col-span-2">
+                                  <label
+                                    htmlFor={`note-${item.id}`}
+                                    className="block text-[11px] font-semibold text-[var(--fg-muted)]"
+                                  >
+                                    Catatan Pribadi / Alasan Incaran
+                                  </label>
+                                  <div className="mt-1 flex gap-2">
+                                    <input
+                                      id={`note-${item.id}`}
+                                      type="text"
+                                      name="note"
+                                      defaultValue={item.note || ""}
+                                      placeholder="Mis: Referensi tugas akhir bab 2..."
+                                      className="w-full rounded-lg border border-[var(--border)] bg-[var(--card)] px-2.5 py-1.5 text-xs text-[var(--fg)]"
+                                    />
+                                    <button
+                                      type="submit"
+                                      className="shrink-0 rounded-lg border border-[#92400E] bg-[#92400E]/10 px-3 py-1.5 text-xs font-semibold text-[#92400E] transition-colors hover:bg-[#92400E] hover:text-white dark:text-amber-300"
+                                    >
+                                      Simpan
+                                    </button>
+                                  </div>
+                                </div>
+                              </div>
+                            </form>
+                          </div>
+
+                          <div className="mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-[var(--border)] pt-3">
+                            <div className="flex flex-wrap items-center gap-2">
+                              {isAvailable ? (
+                                <form action={moveWishlistToCartAction}>
+                                  <input
+                                    type="hidden"
+                                    name="wishlistId"
+                                    value={item.id}
+                                  />
+                                  <input
+                                    type="hidden"
+                                    name="bookId"
+                                    value={item.book.id}
+                                  />
+                                  <input
+                                    type="hidden"
+                                    name="durationDays"
+                                    value="14"
+                                  />
+                                  <button
+                                    type="submit"
+                                    className="inline-flex items-center gap-1.5 rounded-lg bg-[#92400E] px-3.5 py-2 text-xs font-semibold text-white transition-colors hover:bg-[#78350F]"
+                                  >
+                                    <ShoppingBag className="h-3.5 w-3.5" />
+                                    <span>Pindahkan ke Keranjang Pinjam</span>
+                                  </button>
+                                </form>
+                              ) : (
+                                <span className="inline-flex items-center rounded-lg border border-[var(--border)] bg-[var(--muted)] px-3 py-1.5 text-xs font-medium text-[var(--fg-muted)]">
+                                  Menunggu Pengembalian Stok
+                                </span>
+                              )}
+
+                              <Link
+                                href={`/books/${item.book.id}`}
+                                className="inline-flex items-center rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-xs font-semibold text-[var(--fg)] hover:border-[#92400E]"
+                              >
+                                Lihat Detail Buku
+                              </Link>
+                            </div>
+
+                            <form action={removeFromWishlistAction}>
+                              <input
+                                type="hidden"
+                                name="wishlistId"
+                                value={item.id}
+                              />
+                              <button
+                                type="submit"
+                                className="inline-flex items-center gap-1.5 rounded-lg border border-red-200 bg-red-50/70 px-3 py-2 text-xs font-semibold text-red-700 transition-colors hover:bg-red-100 dark:border-red-900/60 dark:bg-red-950/40 dark:text-red-300"
+                              >
+                                <Trash2 className="h-3.5 w-3.5" />
+                                <span>Hapus</span>
+                              </button>
+                            </form>
                           </div>
                         </div>
                       </div>
