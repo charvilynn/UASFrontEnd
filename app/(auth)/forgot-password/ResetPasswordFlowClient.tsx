@@ -3,8 +3,18 @@
 import React, { useEffect, useRef, useState, useTransition } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, CheckCircle2, KeyRound, Mail, RefreshCw, ShieldCheck } from "lucide-react";
 import {
+  ArrowLeft,
+  CheckCircle2,
+  Eye,
+  EyeOff,
+  KeyRound,
+  Mail,
+  RefreshCw,
+  ShieldCheck,
+} from "lucide-react";
+import {
+  completePasswordResetAction,
   requestPasswordResetOtpAction,
   verifyPasswordResetOtpAction,
 } from "@/features/auth/actions";
@@ -18,6 +28,9 @@ export function ResetPasswordFlowClient({ initialEmail = "" }: ResetPasswordFlow
   const [step, setStep] = useState<1 | 2 | 3>(1);
   const [email, setEmail] = useState(initialEmail);
   const [digits, setDigits] = useState<string[]>(["", "", "", "", "", ""]);
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
   const [publicNotice, setPublicNotice] = useState<string | null>(null);
   const [simulationCode, setSimulationCode] = useState<string | null>(null);
@@ -167,6 +180,29 @@ export function ResetPasswordFlowClient({ initialEmail = "" }: ResetPasswordFlow
         return;
       }
       setStep(3);
+    });
+  }
+
+  function handleSaveNewPassword(e: React.FormEvent) {
+    e.preventDefault();
+    setErrorMessage(null);
+
+    if (newPassword.length < 8) {
+      setErrorMessage("Password baru minimal 8 karakter.");
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      setErrorMessage("Konfirmasi password tidak cocok.");
+      return;
+    }
+
+    startTransition(async () => {
+      const res = await completePasswordResetAction(newPassword, confirmPassword);
+      if (!res.ok) {
+        setErrorMessage(res.error || "Gagal menyimpan password baru.");
+        return;
+      }
+      router.push(res.redirectTo || "/login?reset=1");
     });
   }
 
@@ -351,6 +387,69 @@ export function ResetPasswordFlowClient({ initialEmail = "" }: ResetPasswordFlow
                 {resendCooldown > 0 ? `Kirim ulang (${resendCooldown}d)` : "Kirim ulang kode"}
               </button>
             </div>
+          </form>
+        )}
+
+        {step === 3 && (
+          <form onSubmit={handleSaveNewPassword} className="mt-6 space-y-4">
+            <div>
+              <label
+                htmlFor="new-password"
+                className="mb-1.5 block text-xs font-semibold text-[#18130E]"
+              >
+                Password Baru (minimal 8 karakter)
+              </label>
+              <div className="relative">
+                <input
+                  id="new-password"
+                  name="newPassword"
+                  type={showPassword ? "text" : "password"}
+                  required
+                  minLength={8}
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  placeholder="Minimal 8 karakter"
+                  className="w-full rounded-xl border border-[#D8D0BC] bg-[#FBF8F2] py-2.5 pl-3.5 pr-10 text-sm text-[#18130E] placeholder:text-[#8A7E6E] focus:border-[#8A3B12] focus:outline-none"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((prev) => !prev)}
+                  aria-label={showPassword ? "Sembunyikan password" : "Tampilkan password"}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[#8A7E6E] hover:text-[#18130E]"
+                >
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
+            </div>
+
+            <div>
+              <label
+                htmlFor="confirm-password"
+                className="mb-1.5 block text-xs font-semibold text-[#18130E]"
+              >
+                Konfirmasi Password Baru
+              </label>
+              <input
+                id="confirm-password"
+                name="confirmPassword"
+                type={showPassword ? "text" : "password"}
+                required
+                minLength={8}
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                placeholder="Ulangi password baru"
+                className="w-full rounded-xl border border-[#D8D0BC] bg-[#FBF8F2] px-3.5 py-2.5 text-sm text-[#18130E] placeholder:text-[#8A7E6E] focus:border-[#8A3B12] focus:outline-none"
+              />
+            </div>
+
+            <button
+              type="submit"
+              disabled={isPending}
+              data-testid="reset-save-password-btn"
+              className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#8A3B12] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#722F0D] disabled:opacity-60"
+            >
+              {isPending ? "Menyimpan..." : "Simpan Password Baru"}
+            </button>
           </form>
         )}
       </div>
