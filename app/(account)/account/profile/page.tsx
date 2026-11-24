@@ -1,12 +1,18 @@
 import Link from "next/link";
 import {
+  Bell,
   BookCopy,
+  BookOpen,
   CheckCircle2,
   Clock,
   Edit3,
   GraduationCap,
+  Heart,
   Mail,
   Phone,
+  Shield,
+  Sparkles,
+  Target,
 } from "lucide-react";
 import { prisma } from "@/lib/db";
 import { requireAuth } from "@/lib/auth";
@@ -95,6 +101,22 @@ export default async function ProfilePage() {
     );
   }
 
+  const activeLoans = member.loans.filter(
+    (loan) => loan.status === "borrowed" || loan.status === "overdue"
+  );
+  const completedReadings = member.readingHistory.filter(
+    (item) => item.status === "completed"
+  );
+  const goal2026 = member.readingGoals[0] ?? {
+    targetBooks: 12,
+    targetPages: 3600,
+    currentBooks: completedReadings.length,
+    currentPages: member.readingHistory.reduce(
+      (sum, item) => sum + item.pagesRead,
+      0
+    ),
+  };
+
   const cardAccent = member.avatarColor || "#92400E";
   const initials = member.name
     .split(" ")
@@ -108,6 +130,13 @@ export default async function ProfilePage() {
     month: "long",
     year: "numeric",
   });
+
+  const bookGoalPercent = Math.min(
+    100,
+    Math.round(
+      (goal2026.currentBooks / Math.max(1, goal2026.targetBooks)) * 100
+    )
+  );
 
   return (
     <div className="min-h-screen pb-16">
@@ -267,6 +296,191 @@ export default async function ProfilePage() {
                   ))}
                 </svg>
               </div>
+            </div>
+          </div>
+
+          <div className="flex flex-col justify-between gap-6 lg:col-span-5">
+            <div className="rounded-2xl border border-[var(--border)] bg-[var(--card)] p-6 shadow-xs">
+              <div>
+                <h3 className="font-heading text-lg font-bold text-[var(--fg)]">
+                  Akses Cepat Layanan Anggota
+                </h3>
+              </div>
+              <p className="mt-1 text-xs text-[var(--fg-muted)]">
+                Kelola biodata, sirkulasi pinjaman, target literasi, dan keamanan sesi akun.
+              </p>
+
+              <div className="mt-4 grid grid-cols-1 gap-2.5 sm:grid-cols-2">
+                <Link
+                  href="/account/edit-profile"
+                  className="flex items-center gap-3 rounded-xl border border-[var(--border)] bg-[var(--surface)]/60 p-3 text-left transition-colors hover:border-[#92400E]"
+                >
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#92400E]/15 text-[#92400E] dark:text-amber-300">
+                    <Edit3 className="h-4 w-4" />
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold text-[var(--fg)]">
+                      Edit Profil
+                    </p>
+                    <p className="text-[11px] text-[var(--fg-muted)]">
+                      Biodata &amp; warna kartu
+                    </p>
+                  </div>
+                </Link>
+
+                <Link
+                  href="/account/history"
+                  className="flex items-center gap-3 rounded-xl border border-[var(--border)] bg-[var(--surface)]/60 p-3 text-left transition-colors hover:border-[#92400E]"
+                >
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#92400E]/15 text-[#92400E] dark:text-amber-300">
+                    <BookOpen className="h-4 w-4" />
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold text-[var(--fg)]">
+                      Riwayat Bacaan
+                    </p>
+                    <p className="text-[11px] text-[var(--fg-muted)]">
+                      {member.readingHistory.length} entri jurnal baca
+                    </p>
+                  </div>
+                </Link>
+
+                <Link
+                  href="/account/borrowed"
+                  className="flex items-center gap-3 rounded-xl border border-[var(--border)] bg-[var(--surface)]/60 p-3 text-left transition-colors hover:border-[#92400E]"
+                >
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#92400E]/15 text-[#92400E] dark:text-amber-300">
+                    <BookCopy className="h-4 w-4" />
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold text-[var(--fg)]">
+                      Buku Dipinjam
+                    </p>
+                    <p className="text-[11px] text-[var(--fg-muted)]">
+                      {activeLoans.length} pinjaman berjalan
+                    </p>
+                  </div>
+                </Link>
+
+                <Link
+                  href="/wishlist"
+                  className="flex items-center gap-3 rounded-xl border border-[var(--border)] bg-[var(--surface)]/60 p-3 text-left transition-colors hover:border-[#92400E]"
+                >
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#92400E]/15 text-[#92400E] dark:text-amber-300">
+                    <Heart className="h-4 w-4" />
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold text-[var(--fg)]">
+                      Daftar Keinginan
+                    </p>
+                    <p className="text-[11px] text-[var(--fg-muted)]">
+                      {member.wishlists.length} buku disimpan
+                    </p>
+                  </div>
+                </Link>
+
+                <Link
+                  href="/account/security"
+                  className="flex items-center gap-3 rounded-xl border border-[var(--border)] bg-[var(--surface)]/60 p-3 text-left transition-colors hover:border-[#92400E]"
+                >
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#92400E]/15 text-[#92400E] dark:text-amber-300">
+                    <Shield className="h-4 w-4" />
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold text-[var(--fg)]">
+                      Keamanan &amp; Sesi
+                    </p>
+                    <p className="text-[11px] text-[var(--fg-muted)]">
+                      Sandi &amp; perangkat aktif
+                    </p>
+                  </div>
+                </Link>
+
+                <Link
+                  href="/account/reading-goals"
+                  className="flex items-center gap-3 rounded-xl border border-[var(--border)] bg-[var(--surface)]/60 p-3 text-left transition-colors hover:border-[#92400E]"
+                >
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#92400E]/15 text-[#92400E] dark:text-amber-300">
+                    <Target className="h-4 w-4" />
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold text-[var(--fg)]">
+                      Target Baca 2026
+                    </p>
+                    <p className="text-[11px] text-[var(--fg-muted)]">
+                      Progres {bookGoalPercent}% tercapai
+                    </p>
+                  </div>
+                </Link>
+              </div>
+
+              <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-[var(--border)] pt-3 text-xs">
+                <Link
+                  href="/account/history"
+                  className="font-semibold text-[#92400E] hover:underline dark:text-amber-300"
+                >
+                  Lihat Riwayat Bacaan ({member.readingHistory.length})
+                </Link>
+                <Link
+                  href="/account/notifications"
+                  className="inline-flex items-center gap-1 font-semibold text-[#92400E] hover:underline dark:text-amber-300"
+                >
+                  <Bell className="h-3.5 w-3.5" />
+                  <span>
+                    Notifikasi ({member.notifications.length} belum dibaca)
+                  </span>
+                </Link>
+              </div>
+            </div>
+
+            <div className="rounded-2xl border border-[var(--border)] bg-[var(--card)] p-6 shadow-xs">
+              <div className="flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2">
+                  <Sparkles className="h-4 w-4 text-[#92400E] dark:text-amber-400" />
+                  <h3 className="font-heading text-base font-bold text-[var(--fg)]">
+                    Preferensi Genre &amp; Minat Baca
+                  </h3>
+                </div>
+                <Link
+                  href="/onboarding"
+                  className="text-xs font-semibold text-[#92400E] hover:underline dark:text-amber-300"
+                >
+                  Atur Minat
+                </Link>
+              </div>
+
+              {member.preferences.length > 0 ? (
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {member.preferences.map((pref) => (
+                    <Link
+                      key={pref.id}
+                      href={`/explore?category=${encodeURIComponent(pref.category.slug)}`}
+                      className="inline-flex items-center gap-1.5 rounded-full border border-[var(--border)] bg-[var(--surface)] px-3 py-1 text-xs font-semibold text-[var(--fg)] transition-colors hover:border-[#92400E]"
+                    >
+                      <span
+                        className="h-2 w-2 rounded-full"
+                        style={{
+                          backgroundColor:
+                            pref.category.accentColor || "#92400E",
+                        }}
+                      />
+                      <span>{pref.category.name}</span>
+                    </Link>
+                  ))}
+                </div>
+              ) : (
+                <div className="mt-3 flex items-center justify-between gap-3 rounded-xl border border-dashed border-[var(--border)] bg-[var(--surface)]/50 p-3">
+                  <p className="text-xs text-[var(--fg-muted)]">
+                    Anda belum memilih kategori bacaan favorit untuk personalisasi katalog.
+                  </p>
+                  <Link
+                    href="/onboarding"
+                    className="shrink-0 rounded-lg bg-[#92400E] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#78350F]"
+                  >
+                    Pilih Genre
+                  </Link>
+                </div>
+              )}
             </div>
           </div>
         </section>
