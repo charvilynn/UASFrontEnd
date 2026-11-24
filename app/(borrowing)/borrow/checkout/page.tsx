@@ -1,9 +1,13 @@
+import React from "react";
 import Link from "next/link";
 import {
+  CheckSquare,
   Calendar,
   UserCheck,
   FileText,
+  ShieldAlert,
   ArrowLeft,
+  CheckCircle2,
 } from "lucide-react";
 import { prisma } from "@/lib/db";
 import { requireAuth } from "@/lib/auth";
@@ -230,6 +234,77 @@ export default async function BorrowCheckoutPage() {
               </section>
             </div>
 
+            <aside className="space-y-6">
+              <div className="rounded-2xl border border-[var(--border)] bg-[var(--card)] p-5 shadow-xs">
+                <h2 className="font-heading text-lg font-bold text-[var(--fg)]">
+                  Tata Tertib & Konfirmasi
+                </h2>
+
+                <ul className="mt-3 space-y-2.5 text-xs text-[var(--fg-muted)]">
+                  <li className="flex items-start gap-2">
+                    <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" />
+                    <span>
+                      Stok ketersediaan buku di katalog akan langsung diperbarui
+                      secara otomatis setelah Anda menekan tombol konfirmasi.
+                    </span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" />
+                    <span>
+                      Harap mengembalikan buku tepat waktu sesuai tanggal jatuh
+                      tempo yang tertera pada tiket peminjaman.
+                    </span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" />
+                    <span>
+                      Anda wajib menjaga keutuhan fisik buku dan tidak mencoret
+                      halaman koleksi perpustakaan.
+                    </span>
+                  </li>
+                </ul>
+
+                <div className="mt-4 rounded-xl border border-[var(--border)] bg-[var(--surface)] p-3.5">
+                  <label className="flex cursor-pointer items-start gap-2.5 text-xs text-[var(--fg)]">
+                    <input
+                      type="checkbox"
+                      name="agreeTerms"
+                      required
+                      defaultChecked
+                      className="mt-0.5 h-4 w-4 rounded border-[var(--border)] accent-[#92400E]"
+                    />
+                    <span>
+                      Saya menyetujui{" "}
+                      <Link
+                        href="/terms"
+                        className="font-semibold text-[#92400E] underline"
+                      >
+                        Syarat & Ketentuan Sirkulasi
+                      </Link>{" "}
+                      serta bersedia mengembalikan buku tepat waktu.
+                    </span>
+                  </label>
+                </div>
+
+                <button
+                  type="submit"
+                  className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#92400E] px-4 py-3 text-sm font-semibold text-white shadow-xs transition-colors hover:bg-[#78350F]"
+                >
+                  <CheckSquare className="h-4 w-4" />
+                  <span>
+                    Konfirmasi Peminjaman ({eligibleItems.length} Buku)
+                  </span>
+                </button>
+
+                <div className="mt-4 flex items-start gap-2 rounded-lg bg-amber-50 p-2.5 text-[11px] text-amber-900 dark:bg-amber-950/50 dark:text-amber-200">
+                  <ShieldAlert className="mt-0.5 h-4 w-4 shrink-0 text-amber-600" />
+                  <span>
+                    Setelah konfirmasi berhasil, Anda akan diarahkan ke halaman{" "}
+                    <strong>Tiket Resi Peminjaman Digital</strong>.
+                  </span>
+                </div>
+              </div>
+            </aside>
           </form>
         )}
       </div>
