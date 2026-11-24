@@ -9,6 +9,7 @@ import {
   GraduationCap,
   Heart,
   Mail,
+  MessageSquareQuote,
   Phone,
   Shield,
   Sparkles,
@@ -484,6 +485,107 @@ export default async function ProfilePage() {
             </div>
           </div>
         </section>
+
+        <section aria-label="Statistik Ringkas Anggota">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="rounded-2xl border border-[var(--border)] bg-[var(--card)] p-5 shadow-xs">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-semibold tracking-wider uppercase text-[var(--fg-muted)]">
+                  Pinjaman Aktif
+                </span>
+                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#92400E]/15 text-[#92400E] dark:text-amber-300">
+                  <BookCopy className="h-4 w-4" />
+                </div>
+              </div>
+              <p className="font-heading mt-3 text-3xl font-bold text-[var(--fg)]">
+                {activeLoans.length}
+              </p>
+              <p className="mt-1 text-xs text-[var(--fg-muted)]">
+                Dari total {member.loans.length} riwayat transaksi pinjam
+              </p>
+              <Link
+                href="/account/borrowed"
+                className="mt-3 inline-block text-xs font-semibold text-[#92400E] hover:underline dark:text-amber-300"
+              >
+                Kelola Pinjaman &rarr;
+              </Link>
+            </div>
+
+            <div className="rounded-2xl border border-[var(--border)] bg-[var(--card)] p-5 shadow-xs">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-semibold tracking-wider uppercase text-[var(--fg-muted)]">
+                  Buku Selesai Dibaca
+                </span>
+                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-600/15 text-emerald-700 dark:text-emerald-300">
+                  <BookOpen className="h-4 w-4" />
+                </div>
+              </div>
+              <p className="font-heading mt-3 text-3xl font-bold text-[var(--fg)]">
+                {completedReadings.length}
+              </p>
+              <p className="mt-1 text-xs text-[var(--fg-muted)]">
+                Total{" "}
+                {member.readingHistory
+                  .reduce((sum, item) => sum + item.pagesRead, 0)
+                  .toLocaleString("id-ID")}{" "}
+                halaman tercatat
+              </p>
+              <Link
+                href="/account/history"
+                className="mt-3 inline-block text-xs font-semibold text-[#92400E] hover:underline dark:text-amber-300"
+              >
+                Buka Jurnal Baca &rarr;
+              </Link>
+            </div>
+
+            <div className="rounded-2xl border border-[var(--border)] bg-[var(--card)] p-5 shadow-xs">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-semibold tracking-wider uppercase text-[var(--fg-muted)]">
+                  Ulasan Ditulis
+                </span>
+                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-amber-500/15 text-amber-700 dark:text-amber-300">
+                  <MessageSquareQuote className="h-4 w-4" />
+                </div>
+              </div>
+              <p className="font-heading mt-3 text-3xl font-bold text-[var(--fg)]">
+                {member.reviews.length}
+              </p>
+              <p className="mt-1 text-xs text-[var(--fg-muted)]">
+                Kontribusi apresiasi literasi di katalog
+              </p>
+              <Link
+                href="/reviews"
+                className="mt-3 inline-block text-xs font-semibold text-[#92400E] hover:underline dark:text-amber-300"
+              >
+                Lihat Ulasan Komunitas &rarr;
+              </Link>
+            </div>
+
+            <div className="rounded-2xl border border-[var(--border)] bg-[var(--card)] p-5 shadow-xs">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-semibold tracking-wider uppercase text-[var(--fg-muted)]">
+                  Daftar Keinginan
+                </span>
+                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-600/15 text-blue-700 dark:text-blue-300">
+                  <Heart className="h-4 w-4" />
+                </div>
+              </div>
+              <p className="font-heading mt-3 text-3xl font-bold text-[var(--fg)]">
+                {member.wishlists.length}
+              </p>
+              <p className="mt-1 text-xs text-[var(--fg-muted)]">
+                Koleksi buku yang disimpan untuk dipinjam nanti
+              </p>
+              <Link
+                href="/wishlist"
+                className="mt-3 inline-block text-xs font-semibold text-[#92400E] hover:underline dark:text-amber-300"
+              >
+                Kelola Daftar Keinginan &rarr;
+              </Link>
+            </div>
+          </div>
+        </section>
+
       </main>
     </div>
   );
