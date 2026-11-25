@@ -1,3 +1,4 @@
+import React from "react";
 import Link from "next/link";
 import {
   BookOpen,
@@ -9,6 +10,7 @@ import {
   UsersRound,
   ArrowRight,
   Clock,
+  CheckCircle2,
   Layers,
   RotateCcw,
   Bell,
@@ -33,7 +35,9 @@ export default async function AdminDashboardPage() {
     activeLoansCount,
     overdueLoansCount,
     openTicketsCount,
+    recentBooks,
     activeLoans,
+    recentReturnedLoans,
     unreadNotifCount,
     recentNotifications,
   ] = await Promise.all([
@@ -54,9 +58,26 @@ export default async function AdminDashboardPage() {
     prisma.contactMessage.count({
       where: { status: "open" },
     }),
+    prisma.book.findMany({
+      orderBy: { createdAt: "desc" },
+      take: 5,
+      include: {
+        authors: { include: { author: true } },
+        categories: { include: { category: true } },
+      },
+    }),
     prisma.loan.findMany({
       where: { status: { in: ["borrowed", "overdue"] } },
       orderBy: [{ status: "desc" }, { borrowedAt: "desc" }],
+      include: {
+        user: true,
+        book: true,
+      },
+    }),
+    prisma.loan.findMany({
+      where: { status: "returned" },
+      orderBy: { returnedAt: "desc" },
+      take: 5,
       include: {
         user: true,
         book: true,
@@ -465,6 +486,134 @@ export default async function AdminDashboardPage() {
           )}
         </section>
 
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
+          <section className="rounded-2xl border border-[var(--border)] bg-[var(--card)] p-6 shadow-sm">
+            <div className="mb-4 flex items-center justify-between">
+              <div>
+                <h2 className="font-heading text-lg font-bold text-[var(--fg)]">
+                  5 Koleksi Buku Terbaru
+                </h2>
+                <p className="text-xs text-[var(--fg-muted)]">
+                  Katalog terakhir yang ditambahkan ke perpustakaan
+                </p>
+              </div>
+              <Link
+                href="/admin/books"
+                className="text-xs font-semibold text-[#92400E] hover:underline dark:text-amber-300"
+              >
+                Kelola Semua
+              </Link>
+            </div>
+
+            <div className="divide-y divide-[var(--border)]">
+              {recentBooks.map((book) => {
+                const authorName =
+                  book.authors[0]?.author.name || "Penulis Charvlibrary";
+                const categoryName =
+                  book.categories[0]?.category.name || "Umum";
+                const isAvailable = book.stockAvailable > 0;
+                return (
+                  <div
+                    key={book.id}
+                    className="flex items-center justify-between gap-3 py-3.5"
+                  >
+                    <div className="min-w-0 flex-1">
+                      <Link
+                        href={`/books/${book.id}`}
+                        className="font-heading block truncate text-sm font-bold text-[var(--fg)] hover:text-[#92400E] dark:hover:text-amber-300"
+                      >
+                        {book.title}
+                      </Link>
+                      <p className="mt-0.5 truncate text-xs text-[var(--fg-muted)]">
+                        {authorName} • {categoryName} • {book.publishYear}
+                      </p>
+                    </div>
+
+                    <div className="flex shrink-0 items-center gap-2">
+                      <span
+                        className={`rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${
+                          isAvailable
+                            ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-200"
+                            : "bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-200"
+                        }`}
+                      >
+                        {isAvailable ? "Tersedia" : "Tidak Tersedia"}
+                      </span>
+                      <Link
+                        href={`/books/${book.id}/edit`}
+                        className="rounded-lg bg-[var(--surface)] px-2.5 py-1 text-xs font-semibold text-[#92400E] hover:bg-[#92400E] hover:text-white dark:text-amber-300"
+                      >
+                        Edit
+                      </Link>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </section>
+
+          <section className="rounded-2xl border border-[var(--border)] bg-[var(--card)] p-6 shadow-sm">
+            <div className="mb-4 flex items-center justify-between">
+              <div>
+                <h2 className="font-heading text-lg font-bold text-[var(--fg)]">
+                  5 Riwayat Pengembalian Selesai
+                </h2>
+                <p className="text-xs text-[var(--fg-muted)]">
+                  Buku yang telah dikembalikan oleh anggota ke perpustakaan
+                </p>
+              </div>
+              <Link
+                href="/borrow/returns"
+                className="text-xs font-semibold text-[#92400E] hover:underline dark:text-amber-300"
+              >
+                Layanan Pengembalian
+              </Link>
+            </div>
+
+            <div className="divide-y divide-[var(--border)]">
+              {recentReturnedLoans.map((loan) => (
+                <div
+                  key={loan.id}
+                  className="flex items-center justify-between gap-3 py-3.5"
+                >
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2">
+                      <span className="font-mono text-xs font-semibold text-[#92400E] dark:text-amber-300">
+                        {loan.loanCode}
+                      </span>
+                      <span className="text-xs text-[var(--fg-muted)]">
+                        • {loan.user.name}
+                      </span>
+                    </div>
+                    <Link
+                      href={`/books/${loan.book.id}`}
+                      className="font-heading mt-0.5 block truncate text-sm font-bold text-[var(--fg)] hover:underline"
+                    >
+                      {loan.book.title}
+                    </Link>
+                  </div>
+
+                  <div className="shrink-0 text-right">
+                    <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2.5 py-0.5 text-[11px] font-semibold text-emerald-800 dark:bg-emerald-950 dark:text-emerald-200">
+                      <CheckCircle2 className="h-3 w-3" />
+                      <span>Dikembalikan</span>
+                    </span>
+                    {loan.returnedAt && (
+                      <p className="mt-1 text-[11px] text-[var(--fg-muted)]">
+                        Kembali:{" "}
+                        {new Date(loan.returnedAt).toLocaleDateString("id-ID", {
+                          day: "numeric",
+                          month: "short",
+                          year: "numeric",
+                        })}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+        </div>
       </div>
     </div>
   );
