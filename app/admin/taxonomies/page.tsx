@@ -1,3 +1,4 @@
+import React from "react";
 import Link from "next/link";
 import {
   Layers,
@@ -399,6 +400,77 @@ export default async function AdminTaxonomiesPage({
           </div>
         </section>
 
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+          <section className="rounded-2xl border border-[var(--border)] bg-[var(--card)] p-6 shadow-sm">
+            <div className="mb-4 flex items-center justify-between">
+              <h2 className="font-heading text-lg font-bold text-[var(--fg)]">
+                Direktori Penulis ({authors.length})
+              </h2>
+              <Link
+                href="/authors"
+                className="text-xs font-semibold text-[#92400E] hover:underline dark:text-amber-300"
+              >
+                Buka Direktori Penulis
+              </Link>
+            </div>
+
+            <div className="max-h-96 divide-y divide-[var(--border)] overflow-y-auto pr-1">
+              {authors.map((a) => (
+                <div
+                  key={a.id}
+                  className="flex items-center justify-between gap-3 py-2.5 text-sm"
+                >
+                  <div>
+                    <Link
+                      href={`/authors/${a.slug}`}
+                      className="font-semibold text-[var(--fg)] hover:text-[#92400E] dark:hover:text-amber-300"
+                    >
+                      {a.name}
+                    </Link>
+                    <p className="text-xs text-[var(--fg-muted)]">
+                      {a.nationality}{" "}
+                      {a.birthYear ? `• Lahir ${a.birthYear}` : ""}
+                    </p>
+                  </div>
+                  <span className="rounded-full bg-[var(--surface)] px-2.5 py-0.5 text-xs font-semibold text-[#92400E] dark:text-amber-300">
+                    {a._count.books} Karya
+                  </span>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          <section className="rounded-2xl border border-[var(--border)] bg-[var(--card)] p-6 shadow-sm">
+            <div className="mb-4 flex items-center justify-between">
+              <h2 className="font-heading text-lg font-bold text-[var(--fg)]">
+                Daftar Penerbit Mitra ({publishers.length})
+              </h2>
+              <span className="text-xs text-[var(--fg-muted)]">
+                Terdaftar Resmi
+              </span>
+            </div>
+
+            <div className="max-h-96 divide-y divide-[var(--border)] overflow-y-auto pr-1">
+              {publishers.map((p) => (
+                <div
+                  key={p.id}
+                  className="flex items-center justify-between gap-3 py-2.5 text-sm"
+                >
+                  <div>
+                    <p className="font-semibold text-[var(--fg)]">{p.name}</p>
+                    <p className="text-xs text-[var(--fg-muted)]">
+                      {p.city || "Indonesia"}{" "}
+                      {p.foundedYear ? `• Berdiri ${p.foundedYear}` : ""}
+                    </p>
+                  </div>
+                  <span className="rounded-full bg-[var(--surface)] px-2.5 py-0.5 text-xs font-semibold text-[#92400E] dark:text-amber-300">
+                    {p._count.books} Buku
+                  </span>
+                </div>
+              ))}
+            </div>
+          </section>
+        </div>
       </div>
     </div>
   );
