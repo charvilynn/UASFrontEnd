@@ -1,3 +1,4 @@
+import React from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import {
@@ -7,11 +8,15 @@ import {
   Mic,
   Users,
   Ticket,
+  CheckCircle2,
   ListChecks,
+  UserCheck,
+  ArrowRight,
 } from "lucide-react";
 import { prisma } from "@/lib/db";
 import { getSessionUser } from "@/lib/auth";
 import { PageHeader } from "@/components/layout/PageHeader";
+import { submitEventRsvpAction } from "@/features/community/actions";
 
 interface EventDetailPageProps {
   params: Promise<{ id: string }>;
@@ -26,6 +31,7 @@ export default async function EventDetailPage({
   searchParams,
 }: EventDetailPageProps) {
   const { id } = await params;
+  const resolvedSearch = await searchParams;
   const sessionUser = await getSessionUser();
 
   const numericId = Number(id);
@@ -71,6 +77,8 @@ export default async function EventDetailPage({
     ? eventRecord.rsvps.find((r) => r.userId === sessionUser.id)
     : null;
 
+  const activeTicketCode =
+    resolvedSearch.ticket || userExistingRsvp?.ticketCode || null;
 
   return (
     <div className="min-h-screen pb-16">
@@ -246,6 +254,169 @@ export default async function EventDetailPage({
             </section>
           </main>
 
+          <aside className="space-y-6 lg:col-span-5">
+            {activeTicketCode && (
+              <div
+                id="tiket-rsvp"
+                role="status"
+                className="rounded-2xl border-2 border-emerald-600/40 bg-gradient-to-br from-[#251A13] to-[#1C1410] p-6 text-[#FFFBEB] shadow-md"
+              >
+                <div className="flex items-center justify-between">
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/20 px-3 py-1 text-xs font-bold text-emerald-300">
+                    <CheckCircle2 className="h-4 w-4" />
+                    Tiket RSVP Terkonfirmasi
+                  </span>
+                  <Ticket className="h-5 w-5 text-amber-400" />
+                </div>
+
+                <p className="mt-4 text-xs tracking-wider uppercase text-amber-200/75">
+                  Kode Tiket Masuk Digital
+                </p>
+                <p className="mt-1 font-mono text-2xl font-extrabold tracking-widest text-amber-300">
+                  {activeTicketCode}
+                </p>
+
+                <div className="mt-4 space-y-1 border-t border-amber-100/15 pt-3 text-xs text-amber-100/90">
+                  <p>
+                    <span className="font-semibold text-white">Acara:</span>{" "}
+                    {eventRecord.title}
+                  </p>
+                  <p>
+                    <span className="font-semibold text-white">Jadwal:</span>{" "}
+                    {eventRecord.eventDate} ({eventRecord.eventTime})
+                  </p>
+                  <p>
+                    <span className="font-semibold text-white">Ruang:</span>{" "}
+                    {eventRecord.location}
+                  </p>
+                </div>
+              </div>
+            )}
+
+            <section
+              aria-label="Formulir Pendaftaran RSVP"
+              className="rounded-2xl border border-[var(--border)] bg-[var(--card)] p-6 shadow-xs sm:p-7"
+            >
+              <div className="mb-5">
+                <h2 className="font-heading flex items-center gap-2 text-xl font-bold text-[var(--fg)]">
+                  <Ticket className="h-5 w-5 text-[#92400E]" />
+                  Formulir RSVP Interaktif
+                </h2>
+                <p className="mt-1 text-xs text-[var(--fg-muted)]">
+                  Daftarkan diri Anda untuk mendapatkan kode tiket masuk unik
+                  format <span className="font-mono font-semibold">RSVP-2026-XXXX</span>.
+                </p>
+              </div>
+
+              {!sessionUser ? (
+                <div className="rounded-xl border border-[var(--border)] bg-[var(--surface)]/70 p-4 text-xs">
+                  <p className="font-semibold text-[var(--fg)]">
+                    Masuk Akun untuk Mendaftar RSVP
+                  </p>
+                  <p className="mt-1 text-[var(--fg-muted)]">
+                    Silakan masuk menggunakan akun Anda untuk mendaftarkan kehadiran dan menerbitkan tiket masuk acara ini.
+                  </p>
+                  <Link
+                    href={`/login?next=${encodeURIComponent(`/events/${eventRecord.id}`)}`}
+                    className="mt-3 inline-flex items-center gap-1.5 rounded-lg bg-[#92400E] px-4 py-2 text-xs font-semibold text-white transition-colors hover:bg-[#78350F]"
+                  >
+                    <span>Masuk Akun</span>
+                    <ArrowRight className="h-3.5 w-3.5" />
+                  </Link>
+                </div>
+              ) : (
+                <>
+                  <div className="mb-4 rounded-xl border border-[var(--border)] bg-[var(--surface)]/70 p-3 text-xs">
+                    <span className="inline-flex items-center gap-1.5 font-semibold text-[var(--fg)]">
+                      <UserCheck className="h-4 w-4 text-[#92400E]" />
+                      {`Sesi Aktif: ${sessionUser.name} (${sessionUser.memberCode})`}
+                    </span>
+                  </div>
+
+                  <form action={submitEventRsvpAction} className="space-y-4">
+                    <input type="hidden" name="eventId" value={eventRecord.id} />
+
+                    <div>
+                      <label
+                        htmlFor="rsvp-name"
+                        className="mb-1.5 block text-xs font-semibold text-[var(--fg)]"
+                      >
+                        Nama Lengkap Peserta
+                      </label>
+                      <input
+                        id="rsvp-name"
+                        type="text"
+                        name="attendeeName"
+                        required
+                        defaultValue={
+                          userExistingRsvp?.attendeeName || sessionUser.name
+                        }
+                        placeholder="Masukkan nama lengkap Anda"
+                        className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)]/50 px-3.5 py-2.5 text-sm text-[var(--fg)] focus:border-[#92400E] focus:bg-[var(--card)]"
+                      />
+                    </div>
+
+                    <div>
+                      <label
+                        htmlFor="rsvp-email"
+                        className="mb-1.5 block text-xs font-semibold text-[var(--fg)]"
+                      >
+                        Email Kampus / Kontak
+                      </label>
+                      <input
+                        id="rsvp-email"
+                        type="email"
+                        name="attendeeEmail"
+                        required
+                        defaultValue={
+                          userExistingRsvp?.attendeeEmail || sessionUser.email
+                        }
+                        placeholder="nama@email.com"
+                        className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)]/50 px-3.5 py-2.5 text-sm text-[var(--fg)] focus:border-[#92400E] focus:bg-[var(--card)]"
+                      />
+                    </div>
+
+                    <div>
+                      <label
+                        htmlFor="rsvp-notes"
+                        className="mb-1.5 block text-xs font-semibold text-[var(--fg)]"
+                      >
+                        Pertanyaan untuk Narasumber / Catatan (Opsional)
+                      </label>
+                      <textarea
+                        id="rsvp-notes"
+                        name="notes"
+                        rows={3}
+                        defaultValue={userExistingRsvp?.notes || ""}
+                        placeholder="Tuliskan topik diskusi atau pertanyaan yang ingin diajukan..."
+                        className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)]/50 p-3 text-sm text-[var(--fg)] focus:border-[#92400E] focus:bg-[var(--card)]"
+                      />
+                    </div>
+
+                    <button
+                      type="submit"
+                      className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#92400E] px-4 py-3 text-sm font-bold text-white shadow-xs transition-colors hover:bg-[#78350F]"
+                    >
+                      <Ticket className="h-4 w-4" />
+                      {userExistingRsvp
+                        ? "Perbarui Data & Tampilkan Tiket RSVP"
+                        : "Konfirmasi Kehadiran & Terbitkan Tiket"}
+                    </button>
+                  </form>
+                </>
+              )}
+
+              <div className="mt-6 border-t border-[var(--border)] pt-4">
+                <Link
+                  href="/blog"
+                  className="flex items-center justify-between text-xs font-semibold text-[#92400E] hover:underline dark:text-amber-400"
+                >
+                  <span>Baca artikel dan esai literasi terbaru di Jurnal</span>
+                  <ArrowRight className="h-3.5 w-3.5" />
+                </Link>
+              </div>
+            </section>
+          </aside>
         </div>
       </div>
     </div>
