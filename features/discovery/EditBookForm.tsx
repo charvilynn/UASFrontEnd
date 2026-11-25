@@ -1,9 +1,10 @@
 "use client";
 
 import React, { useState, useTransition } from "react";
-import { Save, Upload, AlertCircle } from "lucide-react";
+import { Save, Trash2, Upload, AlertCircle } from "lucide-react";
 import { GeneratedBookCover } from "@/components/books/GeneratedBookCover";
 import {
+  deleteBookFromEditAction,
   updateBookAction,
 } from "@/features/discovery/actions";
 
@@ -49,6 +50,7 @@ export function EditBookForm({
   const [publishYear, setPublishYear] = useState(book.publishYear);
   const [previewUrl, setPreviewUrl] = useState<string | null>(book.coverPath);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [confirmDelete, setConfirmDelete] = useState(false);
   const [isPending, startTransition] = useTransition();
 
   const selectedAuthor =
@@ -77,6 +79,13 @@ export function EditBookForm({
       }
     });
   }
+
+  function handleDelete() {
+    startTransition(async () => {
+      await deleteBookFromEditAction(book.id);
+    });
+  }
+
   return (
     <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
       <div className="lg:col-span-1">
@@ -99,6 +108,44 @@ export function EditBookForm({
             lama akan otomatis diperbarui di katalog.
           </p>
 
+          <div className="mt-8 border-t border-[var(--border)] pt-6">
+            <h3 className="text-xs font-bold tracking-wider uppercase text-red-700 dark:text-red-400">
+              Tindakan Permanen
+            </h3>
+            {!confirmDelete ? (
+              <button
+                type="button"
+                onClick={() => setConfirmDelete(true)}
+                className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-xl border border-red-300 bg-red-50 px-4 py-2.5 text-xs font-semibold text-red-800 transition-colors hover:bg-red-600 hover:text-white dark:border-red-900 dark:bg-red-950/60 dark:text-red-200"
+              >
+                <Trash2 className="h-4 w-4" />
+                <span>Hapus Buku Ini dari Katalog</span>
+              </button>
+            ) : (
+              <div className="mt-3 space-y-2 rounded-xl border border-red-400 bg-red-50/80 p-3 dark:bg-red-950/80">
+                <p className="text-xs font-medium text-red-900 dark:text-red-200">
+                  Yakin ingin menghapus permanen buku ini dari katalog perpustakaan?
+                </p>
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={handleDelete}
+                    disabled={isPending}
+                    className="flex-1 rounded-lg bg-red-700 px-3 py-1.5 text-xs font-bold text-white hover:bg-red-800"
+                  >
+                    Ya, Hapus
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setConfirmDelete(false)}
+                    className="flex-1 rounded-lg border border-[var(--border)] bg-[var(--card)] px-3 py-1.5 text-xs font-semibold text-[var(--fg)]"
+                  >
+                    Batal
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
@@ -232,6 +279,97 @@ export function EditBookForm({
               className="mt-1.5 w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3.5 py-2.5 text-sm text-[var(--fg)]"
             />
           </div>
+
+          <div>
+            <label
+              htmlFor="edit-year"
+              className="block text-xs font-bold text-[var(--fg)]"
+            >
+              Tahun Terbit *
+            </label>
+            <input
+              id="edit-year"
+              name="publishYear"
+              type="number"
+              min={1450}
+              max={2030}
+              required
+              value={publishYear}
+              onChange={(e) => setPublishYear(Number(e.target.value))}
+              className="mt-1.5 w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3.5 py-2.5 text-sm text-[var(--fg)]"
+            />
+          </div>
+
+          <div>
+            <label
+              htmlFor="edit-pages"
+              className="block text-xs font-bold text-[var(--fg)]"
+            >
+              Jumlah Halaman *
+            </label>
+            <input
+              id="edit-pages"
+              name="pages"
+              type="number"
+              min={1}
+              required
+              defaultValue={book.pages}
+              className="mt-1.5 w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3.5 py-2.5 text-sm text-[var(--fg)]"
+            />
+          </div>
+
+          <div>
+            <label
+              htmlFor="edit-language"
+              className="block text-xs font-bold text-[var(--fg)]"
+            >
+              Bahasa *
+            </label>
+            <input
+              id="edit-language"
+              name="language"
+              type="text"
+              required
+              defaultValue={book.language}
+              className="mt-1.5 w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3.5 py-2.5 text-sm text-[var(--fg)]"
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label
+                htmlFor="edit-stock-total"
+                className="block text-xs font-bold text-[var(--fg)]"
+              >
+                Total Eksemplar
+              </label>
+              <input
+                id="edit-stock-total"
+                name="stockTotal"
+                type="number"
+                min={1}
+                defaultValue={book.stockTotal}
+                className="mt-1.5 w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2.5 text-sm text-[var(--fg)]"
+              />
+            </div>
+            <div>
+              <label
+                htmlFor="edit-stock-avail"
+                className="block text-xs font-bold text-[var(--fg)]"
+              >
+                Stok Tersedia
+              </label>
+              <input
+                id="edit-stock-avail"
+                name="stockAvailable"
+                type="number"
+                min={0}
+                defaultValue={book.stockAvailable}
+                className="mt-1.5 w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2.5 text-sm text-[var(--fg)]"
+              />
+            </div>
+          </div>
+
           <div className="sm:col-span-2">
             <label
               htmlFor="edit-cover"
@@ -250,6 +388,51 @@ export function EditBookForm({
                 className="w-full text-xs text-[var(--fg-muted)] file:mr-3 file:rounded-lg file:border-0 file:bg-[#92400E] file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-white"
               />
             </div>
+          </div>
+
+          <div className="sm:col-span-2">
+            <label
+              htmlFor="edit-desc"
+              className="block text-xs font-bold text-[var(--fg)]"
+            >
+              Sinopsis & Deskripsi Buku *
+            </label>
+            <textarea
+              id="edit-desc"
+              name="description"
+              rows={4}
+              required
+              defaultValue={book.description}
+              className="mt-1.5 w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] p-3.5 text-sm text-[var(--fg)]"
+            />
+          </div>
+
+          <div className="sm:col-span-2">
+            <label
+              htmlFor="edit-excerpt"
+              className="block text-xs font-bold text-[var(--fg)]"
+            >
+              Kutipan Sampel Halaman (untuk Pratinjau Buku 3D)
+            </label>
+            <textarea
+              id="edit-excerpt"
+              name="sampleExcerpt"
+              rows={3}
+              defaultValue={book.sampleExcerpt || ""}
+              className="mt-1.5 w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] p-3.5 text-sm text-[var(--fg)]"
+            />
+          </div>
+
+          <div className="sm:col-span-2">
+            <label className="inline-flex items-center gap-2.5 text-xs font-semibold text-[var(--fg)]">
+              <input
+                type="checkbox"
+                name="isFeatured"
+                defaultChecked={book.isFeatured}
+                className="h-4 w-4 rounded border-[var(--border)] accent-[#92400E]"
+              />
+              <span>Tampilkan sebagai Koleksi Unggulan di Beranda</span>
+            </label>
           </div>
         </div>
 
