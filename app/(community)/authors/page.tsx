@@ -1,9 +1,11 @@
+import React from "react";
 import Link from "next/link";
 import {
   Feather,
   Globe,
   BookOpen,
   Search,
+  ArrowRight,
   MapPin,
   Sparkles,
 } from "lucide-react";
@@ -234,6 +236,128 @@ export default async function AuthorsPage({ searchParams }: AuthorsPageProps) {
           </div>
         </section>
 
+        {filteredAuthors.length === 0 ? (
+          <div className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-10 text-center">
+            <Feather className="mx-auto h-10 w-10 text-[var(--fg-muted)]" />
+            <h2 className="font-heading mt-3 text-lg font-bold text-[var(--fg)]">
+              Penulis Tidak Ditemukan
+            </h2>
+            <p className="mt-1 text-sm text-[var(--fg-muted)]">
+              Tidak ada profil penulis yang sesuai dengan filter kewarganegaraan
+              atau kata kunci pencarian.
+            </p>
+            <Link
+              href="/authors"
+              className="mt-4 inline-flex items-center gap-1.5 rounded-lg bg-[#92400E] px-4 py-2 text-xs font-semibold text-white hover:bg-[#78350F]"
+            >
+              Tampilkan Semua Penulis
+            </Link>
+          </div>
+        ) : (
+          <section
+            aria-label="Daftar Profil Penulis"
+            className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3"
+          >
+            {filteredAuthors.map((author) => {
+              const initials = author.name
+                .split(" ")
+                .map((part) => part.charAt(0))
+                .join("")
+                .slice(0, 2)
+                .toUpperCase();
+              const isIndo = author.nationality.toLowerCase() === "indonesia";
+              const topBooks = author.books.slice(0, 2).map((ba) => ba.book);
+
+              return (
+                <article
+                  key={author.id}
+                  className="book-card-3d flex flex-col justify-between rounded-xl border border-[var(--border)] bg-[var(--card)] p-5 shadow-xs"
+                >
+                  <div>
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex items-center gap-3.5">
+                        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#92400E] to-[#3D2B1F] font-heading text-base font-bold text-[#FFFBEB] shadow-xs">
+                          {initials}
+                        </div>
+                        <div>
+                          <h2 className="font-heading text-lg font-bold text-[var(--fg)]">
+                            <Link
+                              href={`/authors/${author.slug}`}
+                              className="hover:text-[#92400E] dark:hover:text-amber-400"
+                            >
+                              {author.name}
+                            </Link>
+                          </h2>
+                          <div className="mt-0.5 flex flex-wrap items-center gap-2 text-xs text-[var(--fg-muted)]">
+                            <span
+                              className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ${
+                                isIndo
+                                  ? "bg-[#92400E]/15 text-[#92400E] dark:text-amber-300"
+                                  : "bg-blue-900/15 text-blue-800 dark:bg-blue-950 dark:text-blue-300"
+                              }`}
+                            >
+                              {author.nationality}
+                            </span>
+                            {author.birthYear && (
+                              <span>Lahir {author.birthYear}</span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+
+                      <span className="shrink-0 rounded-lg border border-[var(--border)] bg-[var(--surface)] px-2.5 py-1 text-xs font-bold text-[var(--fg)]">
+                        {author.books.length} Buku
+                      </span>
+                    </div>
+
+                    <p className="mt-3.5 line-clamp-3 text-sm leading-relaxed text-[var(--fg-muted)]">
+                      {author.bio}
+                    </p>
+
+                    {topBooks.length > 0 && (
+                      <div className="mt-4 rounded-lg border border-[var(--border)] bg-[var(--surface)]/60 p-3">
+                        <p className="text-[11px] font-semibold tracking-wider uppercase text-[var(--fg-muted)]">
+                          Karya di Katalog:
+                        </p>
+                        <ul className="mt-1.5 space-y-1">
+                          {topBooks.map((b) => (
+                            <li
+                              key={b.id}
+                              className="flex items-center justify-between gap-2 text-xs"
+                            >
+                              <Link
+                                href={`/books/${b.id}`}
+                                className="truncate font-medium text-[var(--fg)] hover:text-[#92400E] hover:underline"
+                              >
+                                {b.title}
+                              </Link>
+                              <span className="shrink-0 text-[11px] text-[var(--fg-muted)]">
+                                {b.publishYear}
+                              </span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="mt-5 flex items-center justify-between border-t border-[var(--border)] pt-3.5">
+                    <span className="text-xs text-[var(--fg-muted)]">
+                      Bibliografi & Profil Lengkap
+                    </span>
+                    <Link
+                      href={`/authors/${author.slug}`}
+                      className="inline-flex items-center gap-1.5 rounded-lg bg-[#92400E] px-3.5 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-[#78350F]"
+                    >
+                      Lihat Profil
+                      <ArrowRight className="h-3.5 w-3.5" />
+                    </Link>
+                  </div>
+                </article>
+              );
+            })}
+          </section>
+        )}
       </div>
     </div>
   );

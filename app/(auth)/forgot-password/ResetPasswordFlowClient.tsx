@@ -3,8 +3,21 @@
 import React, { useEffect, useRef, useState, useTransition } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, KeyRound, Mail } from "lucide-react";
-import { requestPasswordResetOtpAction } from "@/features/auth/actions";
+import {
+  ArrowLeft,
+  CheckCircle2,
+  Eye,
+  EyeOff,
+  KeyRound,
+  Mail,
+  RefreshCw,
+  ShieldCheck,
+} from "lucide-react";
+import {
+  completePasswordResetAction,
+  requestPasswordResetOtpAction,
+  verifyPasswordResetOtpAction,
+} from "@/features/auth/actions";
 
 interface ResetPasswordFlowClientProps {
   initialEmail?: string;
@@ -15,6 +28,9 @@ export function ResetPasswordFlowClient({ initialEmail = "" }: ResetPasswordFlow
   const [step, setStep] = useState<1 | 2 | 3>(1);
   const [email, setEmail] = useState(initialEmail);
   const [digits, setDigits] = useState<string[]>(["", "", "", "", "", ""]);
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
   const [publicNotice, setPublicNotice] = useState<string | null>(null);
   const [simulationCode, setSimulationCode] = useState<string | null>(null);
@@ -23,6 +39,7 @@ export function ResetPasswordFlowClient({ initialEmail = "" }: ResetPasswordFlow
   const [isPending, startTransition] = useTransition();
 
   const otpInputRefs = useRef<Array<HTMLInputElement | null>>([]);
+
   useEffect(() => {
     if (resendCooldown <= 0) return;
     const timer = window.setInterval(() => {
@@ -72,6 +89,120 @@ export function ResetPasswordFlowClient({ initialEmail = "" }: ResetPasswordFlow
       setDigits(["", "", "", "", "", ""]);
       setResendCooldown(60);
       otpInputRefs.current[0]?.focus();
+    });
+  }
+
+  function handleDigitChange(index: number, rawValue: string) {
+    const cleaned = rawValue.replace(/\D/g, "");
+    if (!cleaned) {
+      const next = [...digits];
+      next[index] = "";
+      setDigits(next);
+      return;
+    }
+
+    if (cleaned.length > 1) {
+      const next = [...digits];
+      for (let i = 0; i < 6; i++) {
+        if (index + i < 6 && cleaned[i]) {
+          next[index + i] = cleaned[i];
+        }
+      }
+      setDigits(next);
+      const focusIdx = Math.min(5, index + cleaned.length);
+      otpInputRefs.current[focusIdx]?.focus();
+      return;
+    }
+
+    const next = [...digits];
+    next[index] = cleaned[0];
+    setDigits(next);
+
+    if (index < 5) {
+      otpInputRefs.current[index + 1]?.focus();
+    }
+  }
+
+  function handleOtpKeyDown(index: number, e: React.KeyboardEvent<HTMLInputElement>) {
+    if (e.key === "Backspace") {
+      if (digits[index]) {
+        const next = [...digits];
+        next[index] = "";
+        setDigits(next);
+      } else if (index > 0) {
+        const next = [...digits];
+        next[index - 1] = "";
+        setDigits(next);
+        otpInputRefs.current[index - 1]?.focus();
+      }
+      e.preventDefault();
+    } else if (e.key === "ArrowLeft" && index > 0) {
+      otpInputRefs.current[index - 1]?.focus();
+    } else if (e.key === "ArrowRight" && index < 5) {
+      otpInputRefs.current[index + 1]?.focus();
+    }
+  }
+
+  function handleOtpPaste(e: React.ClipboardEvent<HTMLInputElement>) {
+    e.preventDefault();
+    const pasted = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, 6);
+    if (!pasted) return;
+    const next = ["", "", "", "", "", ""];
+    for (let i = 0; i < pasted.length; i++) {
+      next[i] = pasted[i];
+    }
+    setDigits(next);
+    const focusIdx = Math.min(5, pasted.length - 1);
+    otpInputRefs.current[focusIdx]?.focus();
+  }
+
+  function fillSimulationCode() {
+    if (!simulationCode) return;
+    const next = simulationCode.slice(0, 6).split("");
+    while (next.length < 6) next.push("");
+    setDigits(next);
+    otpInputRefs.current[5]?.focus();
+  }
+
+  function handleVerifyOtp(e: React.FormEvent) {
+    e.preventDefault();
+    setErrorMessage(null);
+    const combinedCode = digits.join("");
+    if (combinedCode.length !== 6) {
+      setErrorMessage("Masukkan 6 angka kode verifikasi.");
+      return;
+    }
+
+    startTransition(async () => {
+      const res = await verifyPasswordResetOtpAction(email, combinedCode);
+      if (!res.ok) {
+        setErrorMessage(res.error || "Kode OTP tidak sesuai.");
+        return;
+      }
+      setStep(3);
+    });
+  }
+
+  function handleSaveNewPassword(e: React.FormEvent) {
+    e.preventDefault();
+    setErrorMessage(null);
+
+    if (newPassword.length < 8) {
+      setErrorMessage("Password baru minimal 8 karakter.");
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      setErrorMessage("Konfirmasi password tidak cocok.");
+      return;
+    }
+
+    startTransition(async () => {
+      const res = await completePasswordResetAction(newPassword, confirmPassword);
+      if (!res.ok) {
+        setErrorMessage(res.error || "Gagal menyimpan password baru.");
+        return;
+      }
+      router.push(res.redirectTo || "/login?reset=1");
     });
   }
 
@@ -163,6 +294,162 @@ export function ResetPasswordFlowClient({ initialEmail = "" }: ResetPasswordFlow
                 Kembali ke halaman Masuk
               </Link>
             </div>
+          </form>
+        )}
+
+        {step === 2 && (
+          <form onSubmit={handleVerifyOtp} className="mt-5 space-y-5">
+            {publicNotice && (
+              <div className="flex items-center gap-2 rounded-xl border border-[#2E4A36]/25 bg-[#2E4A36]/10 px-3.5 py-2.5 text-xs text-[#2E4A36]">
+                <CheckCircle2 className="h-4 w-4 shrink-0" />
+                <span>{publicNotice}</span>
+              </div>
+            )}
+
+            {simulationCode && (
+              <div
+                data-testid="otp-simulation-banner"
+                className="flex items-center justify-between gap-3 rounded-xl border border-[#B26700]/30 bg-[#B26700]/10 px-3.5 py-2.5 text-xs text-[#18130E]"
+              >
+                <span>
+                  Mode simulasi: kode Anda{" "}
+                  <strong className="font-mono text-sm font-bold text-[#8A3B12]">
+                    {simulationCode}
+                  </strong>
+                </span>
+                <button
+                  type="button"
+                  onClick={fillSimulationCode}
+                  className="shrink-0 rounded-lg bg-[#8A3B12]/15 px-2.5 py-1 text-[11px] font-semibold text-[#8A3B12] hover:bg-[#8A3B12]/25"
+                >
+                  Isi Kode
+                </button>
+              </div>
+            )}
+
+            <div>
+              <label className="mb-2 block text-xs font-semibold text-[#18130E]">
+                Kode OTP 6 Digit
+              </label>
+              <div className="grid grid-cols-6 gap-2" onPaste={handleOtpPaste}>
+                {digits.map((digit, index) => (
+                  <input
+                    key={index}
+                    ref={(el) => {
+                      otpInputRefs.current[index] = el;
+                    }}
+                    type="text"
+                    inputMode="numeric"
+                    autoComplete={index === 0 ? "one-time-code" : "off"}
+                    maxLength={6}
+                    value={digit}
+                    aria-label={`Digit OTP ke-${index + 1}`}
+                    data-testid={`otp-box-${index}`}
+                    onChange={(e) => handleDigitChange(index, e.target.value)}
+                    onKeyDown={(e) => handleOtpKeyDown(index, e)}
+                    className="h-12 w-full rounded-xl border border-[#D8D0BC] bg-[#FBF8F2] text-center font-mono text-lg font-semibold text-[#18130E] focus:border-[#8A3B12] focus:outline-none"
+                  />
+                ))}
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              disabled={isPending}
+              data-testid="reset-verify-otp-btn"
+              className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#8A3B12] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#722F0D] disabled:opacity-60"
+            >
+              <ShieldCheck className="h-4 w-4" />
+              {isPending ? "Memverifikasi..." : "Verifikasi Kode"}
+            </button>
+
+            <div className="flex items-center justify-between pt-1 text-xs text-[#5A5044]">
+              <button
+                type="button"
+                onClick={() => {
+                  setErrorMessage(null);
+                  setStep(1);
+                }}
+                data-testid="reset-change-email-btn"
+                className="inline-flex items-center gap-1 font-medium text-[#5A5044] hover:text-[#18130E]"
+              >
+                <ArrowLeft className="h-3.5 w-3.5" />
+                Ganti email
+              </button>
+
+              <button
+                type="button"
+                disabled={resendCooldown > 0 || isPending}
+                onClick={handleResendOtp}
+                className="inline-flex items-center gap-1 font-medium text-[#8A3B12] hover:underline disabled:text-[#8A7E6E] disabled:no-underline"
+              >
+                <RefreshCw className="h-3.5 w-3.5" />
+                {resendCooldown > 0 ? `Kirim ulang (${resendCooldown}d)` : "Kirim ulang kode"}
+              </button>
+            </div>
+          </form>
+        )}
+
+        {step === 3 && (
+          <form onSubmit={handleSaveNewPassword} className="mt-6 space-y-4">
+            <div>
+              <label
+                htmlFor="new-password"
+                className="mb-1.5 block text-xs font-semibold text-[#18130E]"
+              >
+                Password Baru (minimal 8 karakter)
+              </label>
+              <div className="relative">
+                <input
+                  id="new-password"
+                  name="newPassword"
+                  type={showPassword ? "text" : "password"}
+                  required
+                  minLength={8}
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  placeholder="Minimal 8 karakter"
+                  className="w-full rounded-xl border border-[#D8D0BC] bg-[#FBF8F2] py-2.5 pl-3.5 pr-10 text-sm text-[#18130E] placeholder:text-[#8A7E6E] focus:border-[#8A3B12] focus:outline-none"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((prev) => !prev)}
+                  aria-label={showPassword ? "Sembunyikan password" : "Tampilkan password"}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[#8A7E6E] hover:text-[#18130E]"
+                >
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
+            </div>
+
+            <div>
+              <label
+                htmlFor="confirm-password"
+                className="mb-1.5 block text-xs font-semibold text-[#18130E]"
+              >
+                Konfirmasi Password Baru
+              </label>
+              <input
+                id="confirm-password"
+                name="confirmPassword"
+                type={showPassword ? "text" : "password"}
+                required
+                minLength={8}
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                placeholder="Ulangi password baru"
+                className="w-full rounded-xl border border-[#D8D0BC] bg-[#FBF8F2] px-3.5 py-2.5 text-sm text-[#18130E] placeholder:text-[#8A7E6E] focus:border-[#8A3B12] focus:outline-none"
+              />
+            </div>
+
+            <button
+              type="submit"
+              disabled={isPending}
+              data-testid="reset-save-password-btn"
+              className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#8A3B12] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#722F0D] disabled:opacity-60"
+            >
+              {isPending ? "Menyimpan..." : "Simpan Password Baru"}
+            </button>
           </form>
         )}
       </div>
