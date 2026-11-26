@@ -18,6 +18,7 @@ import {
 import { prisma } from "@/lib/db";
 import { requireAuth } from "@/lib/auth";
 import { PageHeader } from "@/components/layout/PageHeader";
+import { GeneratedBookCover } from "@/components/books/GeneratedBookCover";
 import { EmptyState } from "@/components/ui/EmptyState";
 
 export const dynamic = "force-dynamic";
@@ -586,6 +587,110 @@ export default async function ProfilePage() {
           </div>
         </section>
 
+        <section className="grid grid-cols-1 gap-6 lg:grid-cols-12">
+          <div className="rounded-2xl border border-[var(--border)] bg-[var(--card)] p-6 shadow-xs lg:col-span-7">
+            <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[var(--border)] pb-4">
+              <div>
+                <h3 className="font-heading text-lg font-bold text-[var(--fg)]">
+                  Pinjaman Buku Saat Ini
+                </h3>
+                <p className="text-xs text-[var(--fg-muted)]">
+                  Buku yang sedang berada dalam masa pinjam Anda
+                </p>
+              </div>
+              <Link
+                href="/account/borrowed"
+                className="rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-1.5 text-xs font-semibold text-[var(--fg)] hover:border-[#92400E]"
+              >
+                Lihat Semua ({activeLoans.length})
+              </Link>
+            </div>
+
+            {activeLoans.length > 0 ? (
+              <div className="mt-4 space-y-4">
+                {(() => {
+                  const nowMs = new Date().getTime();
+                  return activeLoans.slice(0, 3).map((loan) => {
+                  const primaryAuthor =
+                    loan.book.authors[0]?.author.name ?? "Penulis Charvlibrary";
+                  const primaryCategory =
+                    loan.book.categories[0]?.category.name ?? "Literatur";
+                  const diffDays = Math.ceil(
+                    (loan.dueDate.getTime() - nowMs) /
+                      (1000 * 60 * 60 * 24)
+                  );
+                  const isOverdue =
+                    loan.status === "overdue" || diffDays < 0;
+
+                  return (
+                    <div
+                      key={loan.id}
+                      className="flex flex-col justify-between gap-4 rounded-xl border border-[var(--border)] bg-[var(--surface)]/50 p-4 sm:flex-row sm:items-center"
+                    >
+                      <div className="flex items-center gap-4">
+                        <div className="w-14 shrink-0">
+                          <GeneratedBookCover
+                            title={loan.book.title}
+                            author={primaryAuthor}
+                            category={primaryCategory}
+                            coverPath={loan.book.coverPath}
+                            publishYear={loan.book.publishYear}
+                            className="w-14 aspect-[2/3]"
+                          />
+                        </div>
+                        <div>
+                          <span className="font-mono text-[11px] font-semibold text-[#92400E] dark:text-amber-300">
+                            {loan.loanCode}
+                          </span>
+                          <Link
+                            href={`/books/${loan.book.id}`}
+                            className="font-heading block text-base font-bold text-[var(--fg)] hover:text-[#92400E]"
+                          >
+                            {loan.book.title}
+                          </Link>
+                          <p className="text-xs text-[var(--fg-muted)]">
+                            {primaryAuthor} &bull; {loan.book.pages} halaman
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center justify-between gap-3 sm:flex-col sm:items-end">
+                        <span
+                          className={`rounded-full px-3 py-1 text-xs font-semibold ${
+                            isOverdue
+                              ? "bg-red-600/15 text-red-700 dark:text-red-300"
+                              : "bg-emerald-600/15 text-emerald-700 dark:text-emerald-300"
+                          }`}
+                        >
+                          {isOverdue
+                            ? `Terlambat ${Math.abs(diffDays)} hari`
+                            : `Sisa ${diffDays} hari`}
+                        </span>
+                        <Link
+                          href="/account/borrowed"
+                          className="text-xs font-semibold text-[#92400E] hover:underline dark:text-amber-300"
+                        >
+                          Perpanjang / Kembalikan
+                        </Link>
+                      </div>
+                    </div>
+                  );
+                  });
+                })()}
+              </div>
+            ) : (
+              <EmptyState
+                title="Tidak Ada Pinjaman Aktif"
+                description="Anda sedang tidak meminjam buku fisik maupun digital saat ini. Jelajahi katalog untuk mulai meminjam."
+                actionLabel="Eksplorasi Katalog"
+                actionHref="/explore"
+                secondaryActionLabel="Lihat Riwayat Bacaan"
+                secondaryActionHref="/account/history"
+              />
+            )}
+          </div>
+
+        </section>
       </main>
     </div>
   );

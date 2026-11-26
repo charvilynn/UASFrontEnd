@@ -3,12 +3,15 @@ import {
   Award,
   BookCheck,
   BookOpen,
+  Calendar,
   Flame,
+  Save,
   Target,
 } from "lucide-react";
 import { prisma } from "@/lib/db";
 import { requireAuth } from "@/lib/auth";
 import { PageHeader } from "@/components/layout/PageHeader";
+import { updateReadingGoalAction } from "@/features/account/actions";
 
 export const dynamic = "force-dynamic";
 
@@ -175,6 +178,131 @@ export default async function ReadingGoalsPage() {
           </div>
         </section>
 
+        <section className="grid grid-cols-1 gap-8 lg:grid-cols-12">
+          <div className="lg:col-span-7">
+            <form
+              action={updateReadingGoalAction}
+              className="space-y-6 rounded-2xl border border-[var(--border)] bg-[var(--card)] p-6 shadow-xs sm:p-8"
+            >
+              <div className="flex items-center gap-2 border-b border-[var(--border)] pb-4">
+                <Target className="h-5 w-5 text-[#92400E]" />
+                <div>
+                  <h2 className="font-heading text-xl font-bold text-[var(--fg)]">
+                    Formulir Penyesuaian Target Baca 2026
+                  </h2>
+                  <p className="text-xs text-[var(--fg-muted)]">
+                    Ubah sasaran jumlah buku, sasaran halaman, maupun realisasi saat ini pada akun Anda.
+                  </p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+                <div>
+                  <label
+                    htmlFor="targetBooks"
+                    className="mb-1.5 block text-xs font-bold uppercase text-[var(--fg)]"
+                  >
+                    Target Buku Tahun 2026 (`targetBooks`)
+                  </label>
+                  <input
+                    id="targetBooks"
+                    name="targetBooks"
+                    type="number"
+                    min={1}
+                    max={200}
+                    required
+                    defaultValue={goal.targetBooks}
+                    className="w-full rounded-xl border border-[var(--border)] bg-[var(--surface)]/70 px-4 py-2.5 text-sm font-semibold text-[var(--fg)] focus:border-[#92400E]"
+                  />
+                  <p className="mt-1 text-[11px] text-[var(--fg-muted)]">
+                    Disarankan minimal 12 buku (1 buku per bulan).
+                  </p>
+                </div>
+
+                <div>
+                  <label
+                    htmlFor="targetPages"
+                    className="mb-1.5 block text-xs font-bold uppercase text-[var(--fg)]"
+                  >
+                    Target Halaman Tahun 2026 (`targetPages`)
+                  </label>
+                  <input
+                    id="targetPages"
+                    name="targetPages"
+                    type="number"
+                    min={100}
+                    max={100000}
+                    required
+                    defaultValue={goal.targetPages}
+                    className="w-full rounded-xl border border-[var(--border)] bg-[var(--surface)]/70 px-4 py-2.5 text-sm font-semibold text-[var(--fg)] focus:border-[#92400E]"
+                  />
+                  <p className="mt-1 text-[11px] text-[var(--fg-muted)]">
+                    Contoh: 3.600 halaman setara ~300 halaman/bulan.
+                  </p>
+                </div>
+
+                <div>
+                  <label
+                    htmlFor="currentBooks"
+                    className="mb-1.5 block text-xs font-bold uppercase text-[var(--fg)]"
+                  >
+                    Realisasi Buku Selesai (`currentBooks`)
+                  </label>
+                  <input
+                    id="currentBooks"
+                    name="currentBooks"
+                    type="number"
+                    min={0}
+                    max={200}
+                    required
+                    defaultValue={goal.currentBooks}
+                    className="w-full rounded-xl border border-[var(--border)] bg-[var(--surface)]/70 px-4 py-2.5 text-sm font-semibold text-[var(--fg)] focus:border-[#92400E]"
+                  />
+                  <p className="mt-1 text-[11px] text-[var(--fg-muted)]">
+                    Tercatat di Jurnal Bacaan: {completedHistoryCount} buku selesai.
+                  </p>
+                </div>
+
+                <div>
+                  <label
+                    htmlFor="currentPages"
+                    className="mb-1.5 block text-xs font-bold uppercase text-[var(--fg)]"
+                  >
+                    Realisasi Halaman Terbaca (`currentPages`)
+                  </label>
+                  <input
+                    id="currentPages"
+                    name="currentPages"
+                    type="number"
+                    min={0}
+                    max={200000}
+                    required
+                    defaultValue={goal.currentPages}
+                    className="w-full rounded-xl border border-[var(--border)] bg-[var(--surface)]/70 px-4 py-2.5 text-sm font-semibold text-[var(--fg)] focus:border-[#92400E]"
+                  />
+                  <p className="mt-1 text-[11px] text-[var(--fg-muted)]">
+                    Akumulasi Jurnal Bacaan: {historyPagesSum.toLocaleString("id-ID")} halaman.
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex flex-wrap items-center justify-between gap-3 border-t border-[var(--border)] pt-4">
+                <span className="inline-flex items-center gap-1.5 text-xs text-[var(--fg-muted)]">
+                  <Calendar className="h-3.5 w-3.5 text-[#92400E]" />
+                  Periode Evaluasi: Tahun Akademik 2026
+                </span>
+                <button
+                  type="submit"
+                  className="inline-flex cursor-pointer items-center gap-2 rounded-xl bg-[#92400E] px-6 py-2.5 text-xs font-semibold text-white shadow-xs transition-colors hover:bg-[#78350F]"
+                >
+                  <Save className="h-4 w-4" />
+                  <span>Simpan Target Baca 2026</span>
+                </button>
+              </div>
+            </form>
+          </div>
+
+        </section>
       </main>
     </div>
   );
