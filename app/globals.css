@@ -85,3 +85,20 @@
     outline-offset: 2px;
   }
 }
+
+@media (hover: hover) and (pointer: fine) {
+  html.charv-cursor-enabled,
+  html.charv-cursor-enabled a,
+  html.charv-cursor-enabled button,
+  html.charv-cursor-enabled [role="button"],
+  html.charv-cursor-enabled summary {
+    cursor: none;
+  }
+
+  html.charv-cursor-enabled input,
+  html.charv-cursor-enabled textarea,
+  html.charv-cursor-enabled select,
+  html.charv-cursor-enabled [contenteditable="true"] {
+    cursor: auto;
+  }
+}
