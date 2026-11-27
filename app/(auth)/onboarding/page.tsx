@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Sparkles, BookOpen, Target, Wand2 } from "lucide-react";
+import { Sparkles, BookOpen, Target, CheckCircle2, Wand2, Compass } from "lucide-react";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { requireAuth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
@@ -121,6 +121,101 @@ export default async function OnboardingPage() {
                   </label>
                 );
               })}
+            </div>
+          </section>
+
+          <section className="rounded-2xl border border-[var(--border)] bg-[var(--card)] p-6 shadow-sm sm:p-8">
+            <div className="mb-6 flex items-center justify-between border-b border-[var(--border)] pb-4">
+              <div>
+                <h2 className="font-heading text-xl font-bold text-[var(--fg)]">
+                  2. Tetapkan Target Membaca Tahunan (Tahun Akademik 2026)
+                </h2>
+                <p className="mt-1 text-xs sm:text-sm text-[var(--fg-muted)]">
+                  Target ini akan dipantau secara langsung di halaman Profil Anggota dan halaman
+                  Target Baca Tahunan.
+                </p>
+              </div>
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#D97706]/15 text-[#92400E] dark:text-amber-300">
+                <Target className="h-5 w-5" />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+              <div>
+                <label
+                  htmlFor="targetBooks"
+                  className="mb-1.5 block text-sm font-semibold text-[var(--fg)]"
+                >
+                  Target Jumlah Buku Selesai Dibaca (2026)
+                </label>
+                <input
+                  id="targetBooks"
+                  name="targetBooks"
+                  type="number"
+                  min={1}
+                  max={200}
+                  required
+                  defaultValue={defaultTargetBooks}
+                  className="w-full rounded-xl border border-[var(--border)] bg-[var(--bg)] px-4 py-2.5 text-sm font-semibold text-[var(--fg)] focus:border-[#92400E] focus:outline-none"
+                />
+                <p className="mt-1.5 text-xs text-[var(--fg-muted)]">
+                  Rekomendasi mahasiswa aktif: 12 hingga 24 buku per tahun (1-2 buku per bulan).
+                </p>
+              </div>
+
+              <div>
+                <label
+                  htmlFor="targetPages"
+                  className="mb-1.5 block text-sm font-semibold text-[var(--fg)]"
+                >
+                  Target Total Halaman Terbaca (2026)
+                </label>
+                <input
+                  id="targetPages"
+                  name="targetPages"
+                  type="number"
+                  min={100}
+                  max={100000}
+                  step={50}
+                  required
+                  defaultValue={defaultTargetPages}
+                  className="w-full rounded-xl border border-[var(--border)] bg-[var(--bg)] px-4 py-2.5 text-sm font-semibold text-[var(--fg)] focus:border-[#92400E] focus:outline-none"
+                />
+                <p className="mt-1.5 text-xs text-[var(--fg-muted)]">
+                  Rata-rata 1 buku setara dengan 280 hingga 320 halaman literatur.
+                </p>
+              </div>
+            </div>
+
+            <div className="mt-8 flex flex-col items-center justify-between gap-4 border-t border-[var(--border)] pt-6 sm:flex-row">
+              <div className="flex items-center gap-2 text-xs text-[var(--fg-muted)]">
+                <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+                <span>
+                  Status orientasi saat ini:{" "}
+                  <strong className="text-[var(--fg)]">
+                    {user.onboardingDone
+                      ? "Sudah Diselesaikan (Dapat Diperbarui Kapan Saja)"
+                      : "Menunggu Konfirmasi Preferensi"}
+                  </strong>
+                </span>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-3">
+                <Link
+                  href="/explore"
+                  className="inline-flex items-center gap-1.5 rounded-xl border border-[var(--border)] bg-[var(--bg)] px-4 py-2.5 text-xs font-semibold text-[var(--fg)] transition hover:border-[#92400E]"
+                >
+                  <Compass className="h-4 w-4" />
+                  Lewati ke Katalog
+                </Link>
+                <button
+                  type="submit"
+                  className="inline-flex items-center gap-2 rounded-xl bg-[#92400E] px-6 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-[#78350F]"
+                >
+                  <Sparkles className="h-4 w-4" />
+                  Simpan Preferensi & Buka Rekomendasi Personal
+                </button>
+              </div>
             </div>
           </section>
         </form>
