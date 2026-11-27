@@ -1,3 +1,4 @@
+import React from "react";
 import Link from "next/link";
 import {
   BookOpen,
@@ -349,6 +350,44 @@ export default async function HelpCenterPage() {
           </div>
         </section>
 
+        <section className="rounded-2xl border border-[var(--border)] bg-[var(--card)] p-6 shadow-sm sm:p-8">
+          <div className="mb-5 flex flex-wrap items-center justify-between gap-2">
+            <div>
+              <h2 className="font-heading text-xl font-bold text-[var(--fg)]">
+                Pertanyaan yang Paling Sering Diajukan
+              </h2>
+              <p className="text-xs text-[var(--fg-muted)]">
+                Diambil dari basis pengetahuan Tanya Jawab (FAQ) Charvlibrary
+              </p>
+            </div>
+            <Link
+              href="/faq"
+              className="inline-flex items-center gap-1 text-xs font-semibold text-[#92400E] hover:underline dark:text-amber-300"
+            >
+              <span>Buka Halaman FAQ Interaktif</span>
+              <ArrowRight className="h-3.5 w-3.5" />
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            {topFaqs.map((item) => (
+              <div
+                key={item.id}
+                className="rounded-xl border border-[var(--border)] bg-[var(--surface)]/70 p-4"
+              >
+                <span className="inline-block rounded bg-[var(--card)] px-2 py-0.5 text-[10px] font-bold tracking-wider uppercase text-[#92400E] dark:text-amber-300">
+                  {item.category}
+                </span>
+                <h3 className="font-heading mt-2 text-sm font-bold text-[var(--fg)]">
+                  {item.question}
+                </h3>
+                <p className="mt-1.5 text-xs leading-relaxed text-[var(--fg-muted)]">
+                  {item.answer}
+                </p>
+              </div>
+            ))}
+          </div>
+        </section>
       </div>
     </div>
   );
