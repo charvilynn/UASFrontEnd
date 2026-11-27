@@ -448,6 +448,318 @@ async function main() {
       }
     }
   }
+
+  const blogPostsData = [
+    {
+      title: "10 Buku Wajib Mahasiswa Baru untuk Membangun Cara Berpikir Kritis",
+      slug: "buku-wajib-mahasiswa",
+      category: "Rekomendasi Bacaan",
+      authorName: "Aurelia Cheryl Claresta",
+      authorRole: "Editor Jurnal Literasi",
+      readTimeMinutes: 6,
+      isFeatured: true,
+      excerpt:
+        "Memasuki dunia perkuliahan menuntut perubahan cara belajar dari sekadar menghafal menuju analisis kritis lintas disiplin.",
+      content: `Memasuki bangku perguruan tinggi adalah momen terbaik bagi mahasiswa untuk memperluas cakrawala bacaan di luar diktat kuliah. Kebiasaan membaca buku lintas disiplin membantu kita menghubungkan teori di kelas dengan persoalan nyata di masyarakat.\n\nPertama, mulailah dengan buku yang melatih struktur berpikir seperti "Thinking, Fast and Slow" karya Daniel Kahneman dan "Filosofi Teras" karya Henry Manampiring. Kedua buku ini membuka kesadaran kita terhadap bias kognitif sekaligus melatih ketenangan emosional saat menghadapi tekanan tugas akademik.\n\nKedua, jangan lewatkan karya sastra Indonesia seperti "Bumi Manusia" dan "Laskar Pelangi". Sastra mengasah empati sosial dan kepekaan bahasa yang sangat berguna ketika menyusun esai maupun karya ilmiah.\n\nKetiga, bagi mahasiswa rumpun sains dan teknologi, buku klasik seperti "Clean Code" dan "The Pragmatic Programmer" wajib dibaca sejak tahun pertama agar terbiasa menulis kode yang rapi serta mudah dipelihara oleh tim.`,
+    },
+    {
+      title: "Teknik Membaca Aktif dengan Metode Catatan Zettelkasten",
+      slug: "teknik-membaca-aktif-zettelkasten",
+      category: "Tips Belajar",
+      authorName: "Chandra Wijaya",
+      authorRole: "Kontributor Akademik",
+      readTimeMinutes: 5,
+      isFeatured: true,
+      excerpt:
+        "Bagaimana cara agar isi buku yang kita baca tidak menguap begitu saja setelah halaman terakhir ditutup?",
+      content: `Banyak pembaca mengeluhkan lupa isi buku hanya beberapa minggu setelah selesai membacanya. Masalah utamanya terletak pada cara membaca yang pasif tanpa proses sintesis gagasan.\n\nMetode Zettelkasten yang dipopulerkan oleh sosiolog Niklas Luhmann mengajarkan kita membuat catatan atomik menggunakan kalimat sendiri. Setiap kali menemukan ide penting di buku Charvlibrary, tuliskan kembali gagasan tersebut dalam satu kartu ringkas lalu hubungkan dengan catatan lain yang sudah Anda miliki.\n\nDengan cara ini, koleksi bacaan pribadi Anda di fitur Daftar Keinginan dan Jurnal Bacaan Charvlibrary dapat menjadi jaringan pengetahuan yang siap dipakai kapan saja saat menyusun skripsi atau riset.`,
+    },
+    {
+      title: "Menelusuri Jejak Sejarah Nusantara Melalui Novel Pramoedya Ananta Toer",
+      slug: "jejak-sejarah-nusantara-pramoedya",
+      category: "Esai Sastra",
+      authorName: "Aurelia Cheryl Claresta",
+      authorRole: "Editor Jurnal Literasi",
+      readTimeMinutes: 8,
+      isFeatured: false,
+      excerpt:
+        "Tetralogi Buru bukan sekadar karya fiksi sejarah, melainkan cermin pembentukan kesadaran nasional pada awal abad kedua puluh.",
+      content: `Membaca "Bumi Manusia" dan "Anak Semua Bangsa" membawa kita masuk ke ruang batin Minke, seorang pelajar pribumi yang bergulat dengan modernitas Eropa sekaligus ketidakadilan kolonial.\n\nMelalui riset arsip surat kabar lama yang mendalam, Pramoedya berhasil menghidupkan suasana Surabaya dan Batavia pada pergantian abad. Di Charvlibrary, seluruh seri ini menjadi koleksi yang paling sering dipinjam oleh sivitas akademika dan pencinta sastra setiap semester.`,
+    },
+    {
+      title: "Mengapa Insinyur Perangkat Lunak Tetap Perlu Membaca Buku Cetak dan Konseptual",
+      slug: "mengapa-insinyur-perlu-buku-konseptual",
+      category: "Teknologi & Riset",
+      authorName: "Davvin Denielsen Fusta",
+      authorRole: "Kurator Katalog Teknologi",
+      readTimeMinutes: 7,
+      isFeatured: false,
+      excerpt:
+        "Dokumentasi singkat di internet membantu menyelesaikan bug hari ini, tetapi buku arsitektur membentuk fondasi karier jangka panjang.",
+      content: `Di era pencarian instan, banyak mahasiswa pemrograman hanya mengandalkan potongan kode singkat tanpa memahami prinsip dasar di baliknya. Padahal, kerangka kerja berganti setiap beberapa tahun sementara prinsip desain sistem tetap bertahan puluhan tahun.\n\nBuku seperti "Designing Data-Intensive Applications" karya Martin Kleppmann atau "Refactoring" karya Martin Fowler membahas pertukaran desain secara mendalam yang tidak mungkin dirangkum dalam artikel pendek.`,
+    },
+    {
+      title: "Stoikisme di Kampus: Menjaga Fokus di Tengah Banjir Notifikasi Digital",
+      slug: "stoikisme-di-kampus-fokus-digital",
+      category: "Psikologi & Filsafat",
+      authorName: "Liviana Winata",
+      authorRole: "Penulis Tamu",
+      readTimeMinutes: 5,
+      isFeatured: false,
+      excerpt:
+        "Pelajaran dari Marcus Aurelius dan Epictetus untuk mengelola kecemasan akademik serta membangun kebiasaan kerja mendalam.",
+      content: `Dikotomi kendali dalam filsafat Stoik mengajarkan kita membedakan hal yang berada di bawah kendali kita dan hal di luar kendali kita. Usaha belajar dan kejujuran akademik adalah kendali kita, sedangkan komentar orang lain berada di luar kendali kita.\n\nJika digabungkan dengan metode dari buku "Deep Work" karya Cal Newport, mahasiswa dapat menciptakan blok waktu bebas gangguan selama dua jam setiap pagi di ruang baca perpustakaan.`,
+    },
+    {
+      title: "Panduan Memanfaatkan Daftar Keinginan dan Target Baca Tahunan di Charvlibrary",
+      slug: "panduan-rak-kustom-dan-target-baca",
+      category: "Panduan Platform",
+      authorName: "Olivian Cerlindo",
+      authorRole: "Koordinator Perpustakaan",
+      readTimeMinutes: 4,
+      isFeatured: false,
+      excerpt:
+        "Maksimalkan fitur personalisasi di akun Charvlibrary Anda untuk menyimpan referensi mata kuliah dan memantau progres membaca.",
+      content: `Charvlibrary dirancang bukan hanya sebagai katalog pencarian, tetapi juga ruang kerja literasi pribadi. Melalui menu Daftar Keinginan, Anda dapat menyimpan buku incaran berdasarkan prioritas bacaan serta menambahkan catatan riset pribadi.\n\nSelain itu, kunjungi halaman Target Baca untuk menetapkan jumlah buku dan halaman yang ingin Anda selesaikan tahun ini.`,
+    },
+    {
+      title: "Membedah Psikologi Uang dan Keputusan Ekonomi Mahasiswa",
+      slug: "psikologi-uang-keputusan-ekonomi",
+      category: "Ekonomi & Bisnis",
+      authorName: "Aaron Valerio Lieputra",
+      authorRole: "Pengulas Buku Bisnis",
+      readTimeMinutes: 6,
+      isFeatured: false,
+      excerpt:
+        "Mengelola keuangan pribadi sejak bangku kuliah lebih banyak berkaitan dengan perilaku dibandingkan rumus matematika rumit.",
+      content: `Dalam buku "The Psychology of Money", Morgan Housel menekankan bahwa keberhasilan finansial sangat ditentukan oleh kebiasaan mengendalikan ego dan kesabaran jangka panjang.\n\nMelalui koleksi kategori Business di Charvlibrary, anggota dapat mempelajari dasar pengelolaan anggaran, investasi leher ke atas, dan cara kerja insentif ekonomi.`,
+    },
+    {
+      title: "Masa Depan Perpustakaan Kampus sebagai Ruang Kolaborasi Komunitas",
+      slug: "masa-depan-perpustakaan-ruang-kolaborasi",
+      category: "Komunitas",
+      authorName: "Aurelia Cheryl Claresta",
+      authorRole: "Editor Jurnal Literasi",
+      readTimeMinutes: 5,
+      isFeatured: false,
+      excerpt:
+        "Perpustakaan modern bertransformasi dari gudang penyimpanan buku yang sunyi menjadi pusat diskusi, bedah buku, dan lokakarya penulisan.",
+      content: `Perpustakaan abad kedua puluh satu menggabungkan kemudahan akses katalog digital dengan kehangatan pertemuan tatap muka. Setiap bulan, Charvlibrary menyelenggarakan sesi bedah buku, lokakarya penulisan ilmiah, dan diskusi literasi lintas fakultas.`,
+    },
+  ];
+
+  for (const post of blogPostsData) {
+    await prisma.blogPost.create({
+      data: post,
+    });
+  }
+
+  const eventsData = [
+    {
+      title: "Bedah Buku & Diskusi Sastra: Bumi Manusia dan Kesadaran Sejarah",
+      slug: "bedah-buku-bumi-manusia",
+      category: "Bedah Buku",
+      eventDate: "2026-05-16",
+      eventTime: "14:00 - 16:30 WIB",
+      location: "Auditorium Lantai 3 Charvlibrary & Zoom Hybrid",
+      speakerName: "Prof. Dr. Hendra Wijaya & Aurelia Cheryl Claresta",
+      description:
+        "Diskusi mendalam mengenai konteks sejarah awal abad ke-20 dalam karya Pramoedya Ananta Toer serta relevansinya bagi generasi muda saat ini.",
+      agenda:
+        "14:00 Pembukaan oleh Moderator | 14:15 Pemaparan Konteks Sejarah | 15:00 Diskusi Panel & Tanya Jawab | 16:00 Sesi Kurasi Koleksi Sastra",
+      maxQuota: 60,
+    },
+    {
+      title: "Workshop Penulisan Karya Ilmiah & Manajemen Referensi",
+      slug: "workshop-penulisan-karya-ilmiah",
+      category: "Workshop",
+      eventDate: "2026-05-23",
+      eventTime: "09:30 - 12:00 WIB",
+      location: "Ruang Seminar B201 Charvlibrary",
+      speakerName: "Olivian Cerlindo",
+      description:
+        "Pelatihan praktis menyusun tinjauan pustaka, teknik sitasi akademik bebas plagiarisme, dan pemanfaatan katalog Charvlibrary untuk riset skripsi.",
+      agenda:
+        "09:30 Registrasi Peserta | 09:45 Strategi Pencarian Literatur | 10:45 Praktik Menyusun Sitasi | 11:30 Evaluasi Draf Peserta",
+      maxQuota: 45,
+    },
+    {
+      title: "Diskusi Rekayasa Perangkat Lunak: Membedah Clean Code & Refactoring",
+      slug: "klub-baca-clean-code-refactoring",
+      category: "Bedah Buku",
+      eventDate: "2026-05-30",
+      eventTime: "15:30 - 17:30 WIB",
+      location: "Pojok Kolaborasi Digital Lantai 2",
+      speakerName: "Davvin Denielsen Fusta & Tim Rekayasa Perangkat Lunak",
+      description:
+        "Pertemuan mahasiswa ilmu komputer membedah studi kasus penulisan kode bersih dan arsitektur modular.",
+      agenda:
+        "15:30 Review Bab 1-4 Clean Code | 16:15 Live Refactoring Studi Kasus | 17:00 Diskusi Terbuka",
+      maxQuota: 35,
+    },
+    {
+      title: "Webinar Literasi Finansial & Psikologi Pengambilan Keputusan",
+      slug: "webinar-literasi-finansial-psikologi",
+      category: "Webinar",
+      eventDate: "2026-06-06",
+      eventTime: "19:00 - 21:00 WIB",
+      location: "Siaran Langsung Ruang Virtual Charvlibrary",
+      speakerName: "Aaron Valerio Lieputra & Dr. Nadia Pramesti",
+      description:
+        "Mengupas isi buku The Psychology of Money dan Thinking, Fast and Slow untuk membantu mahasiswa mengambil keputusan finansial yang bijak.",
+      agenda:
+        "19:00 Pengantar Ekonomi Perilaku | 19:45 Studi Kasus Keuangan Mahasiswa | 20:30 Tanya Jawab Interaktif",
+      maxQuota: 120,
+    },
+    {
+      title: "Bincang Sore Filsafat Stoikisme: Seni Hidup Tenang di Era Digital",
+      slug: "bincang-sore-filsafat-stoikisme",
+      category: "Bedah Buku",
+      eventDate: "2026-06-13",
+      eventTime: "16:00 - 18:00 WIB",
+      location: "Taman Baca Terbuka Charvlibrary",
+      speakerName: "Chandra Wijaya & Liviana Winata",
+      description:
+        "Sesi berbagi pengalaman menerapkan prinsip Filosofi Teras dan Meditations dalam menghadapi ujian serta tugas akhir.",
+      agenda:
+        "16:00 Pembacaan Kutipan Pilihan | 16:30 Diskusi Lingkar Kecil | 17:30 Refleksi Penutup",
+      maxQuota: 40,
+    },
+    {
+      title: "Pameran Koleksi Langka & Orientasi Anggota Baru Semester Ganjil",
+      slug: "pameran-koleksi-langka-orientasi",
+      category: "Workshop",
+      eventDate: "2026-06-20",
+      eventTime: "10:00 - 15:00 WIB",
+      location: "Aula Utama Charvlibrary",
+      speakerName: "Tim Pustakawan Charvlibrary",
+      description:
+        "Tur keliling fasilitas perpustakaan, pengenalan sistem peminjaman mandiri, dan pameran edisi cetak perdana sastra Nusantara.",
+      agenda:
+        "10:00 Tur Katalog & Ruang Baca | 11:30 Demo Peminjaman Digital | 13:30 Sesi Kurasi Bersama Pustakawan",
+      maxQuota: 80,
+    },
+  ];
+
+  for (let i = 0; i < eventsData.length; i++) {
+    await prisma.event.create({
+      data: eventsData[i],
+    });
+  }
+
+  const faqsData = [
+    {
+      question: "Berapa jumlah maksimal buku yang dapat dipinjam secara bersamaan?",
+      answer:
+        "Setiap anggota aktif Charvlibrary dapat meminjam maksimal 5 buku secara bersamaan dengan durasi peminjaman standar 7, 14, atau 21 hari.",
+      category: "Peminjaman",
+      sortOrder: 1,
+      helpfulYes: 0,
+      helpfulNo: 0,
+    },
+    {
+      question: "Bagaimana cara memperpanjang masa pinjam buku yang sedang dipinjam?",
+      answer:
+        "Buka halaman Pengembalian & Perpanjangan atau Buku Dipinjam, lalu klik tombol Perpanjang 7 Hari selama kuota perpanjangan belum mencapai 2 kali dan buku belum melewati batas jatuh tempo.",
+      category: "Peminjaman",
+      sortOrder: 2,
+      helpfulYes: 0,
+      helpfulNo: 0,
+    },
+    {
+      question: "Apa yang terjadi pada status buku ketika sedang dipinjam oleh anggota?",
+      answer:
+        "Setiap buku yang sedang dipinjam otomatis berubah status menjadi Tidak Tersedia di katalog hingga buku tersebut dikembalikan ke perpustakaan.",
+      category: "Layanan",
+      sortOrder: 3,
+      helpfulYes: 0,
+      helpfulNo: 0,
+    },
+    {
+      question: "Bagaimana cara mengusulkan atau menambahkan buku baru ke dalam katalog Charvlibrary?",
+      answer:
+        "Anggota dapat mengirimkan usulan pengadaan buku melalui formulir Hubungi Pustakawan. Pustakawan (Admin) kemudian menambahkan buku baru beserta sampulnya ke katalog melalui fitur khusus Admin.",
+      category: "Koleksi",
+      sortOrder: 4,
+      helpfulYes: 0,
+      helpfulNo: 0,
+    },
+    {
+      question: "Apa yang terjadi jika buku di katalog belum memiliki file gambar sampul?",
+      answer:
+        "Jika sebuah buku belum memiliki unggahan gambar sampul, sistem Charvlibrary secara otomatis menampilkan sampul buku tipografis lengkap dengan judul, penulis, dan palet warna kategori.",
+      category: "Koleksi",
+      sortOrder: 5,
+      helpfulYes: 0,
+      helpfulNo: 0,
+    },
+    {
+      question: "Bagaimana cara menggunakan fitur pencarian cepat di bilah atas?",
+      answer:
+        "Tekan pintasan keyboard Ctrl+K (atau Cmd+K pada macOS) dari halaman mana saja, lalu ketikkan judul buku, nama penulis, atau nomor ISBN untuk menemukan buku secara instan.",
+      category: "Koleksi",
+      sortOrder: 6,
+      helpfulYes: 0,
+      helpfulNo: 0,
+    },
+    {
+      question: "Bagaimana prosedur reset kata sandi jika saya lupa password akun?",
+      answer:
+        "Klik tautan Lupa Kata Sandi di halaman Masuk, masukkan email kampus Anda, masukkan kode OTP 6 digit pada langkah kedua, lalu buat password baru Anda pada langkah ketiga di halaman yang sama.",
+      category: "Akun",
+      sortOrder: 7,
+      helpfulYes: 0,
+      helpfulNo: 0,
+    },
+    {
+      question: "Apakah saya bisa menyimpan daftar buku incaran untuk mata kuliah tertentu?",
+      answer:
+        "Tentu saja. Gunakan fitur Daftar Keinginan untuk menyimpan buku dari katalog, mengatur tingkat prioritas bacaan, dan menambahkan catatan riset pribadi.",
+      category: "Koleksi",
+      sortOrder: 8,
+      helpfulYes: 0,
+      helpfulNo: 0,
+    },
+    {
+      question: "Bagaimana sistem rekomendasi buku bekerja di Charvlibrary?",
+      answer:
+        "Halaman Rekomendasi menggabungkan preferensi genre yang Anda pilih saat orientasi akun dengan riwayat peminjaman serta peringkat tertinggi di kategori tersebut.",
+      category: "Koleksi",
+      sortOrder: 9,
+      helpfulYes: 0,
+      helpfulNo: 0,
+    },
+    {
+      question: "Di mana saya bisa melihat kartu anggota perpustakaan digital saya?",
+      answer:
+        "Kartu anggota digital lengkap dengan kode unik anggota dan status keanggotaan dapat dilihat melalui halaman Profil Anggota.",
+      category: "Akun",
+      sortOrder: 10,
+      helpfulYes: 0,
+      helpfulNo: 0,
+    },
+    {
+      question: "Bagaimana cara mengembalikan buku yang sudah selesai dibaca?",
+      answer:
+        "Anda dapat mengembalikan buku secara mandiri melalui halaman Pengembalian & Perpanjangan atau menyerahkannya kepada Pustakawan agar status buku kembali menjadi Tersedia.",
+      category: "Layanan",
+      sortOrder: 11,
+      helpfulYes: 0,
+      helpfulNo: 0,
+    },
+    {
+      question: "Bagaimana cara mendaftar ke acara bedah buku atau lokakarya literasi?",
+      answer:
+        "Buka halaman Acara & Kegiatan, pilih acara yang diminati, lalu isi formulir pendaftaran pada halaman detail acara untuk mendapatkan kode tiket kehadiran.",
+      category: "Peminjaman",
+      sortOrder: 12,
+      helpfulYes: 0,
+      helpfulNo: 0,
+    },
+  ];
+
+  await prisma.faq.createMany({ data: faqsData });
+
   const totalBooks = await prisma.book.count();
   const totalCategories = await prisma.category.count();
   const totalUsers = await prisma.user.count();
