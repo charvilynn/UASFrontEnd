@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Shield, Filter } from "lucide-react";
+import { History, Shield, CheckCircle2, XCircle, Monitor, Globe, Filter } from "lucide-react";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { requireAuth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
@@ -154,6 +154,75 @@ export default async function LoginHistoryPage({ searchParams }: LoginHistoryPag
             >
               Hanya Akun Saya ({myTotalCount})
             </Link>
+          </div>
+        </div>
+
+        <div className="overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--card)] shadow-sm">
+          <div className="flex items-center justify-between border-b border-[var(--border)] px-6 py-4">
+            <div className="flex items-center gap-2">
+              <History className="h-4 w-4 text-[#92400E] dark:text-amber-400" />
+              <h2 className="font-heading text-base font-bold text-[var(--fg)]">
+                Tabel Audit Aktivitas Login ({historyRows.length} Baris Ditampilkan)
+              </h2>
+            </div>
+          </div>
+
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse text-left text-xs sm:text-sm">
+              <thead>
+                <tr className="border-b border-[var(--border)] bg-[var(--surface)] text-[11px] font-bold uppercase tracking-wider text-[var(--fg-muted)]">
+                  <th className="px-5 py-3.5">Waktu Kejadian</th>
+                  <th className="px-5 py-3.5">Status</th>
+                  <th className="px-5 py-3.5">Akun Email</th>
+                  <th className="px-5 py-3.5">Alamat IP & Perangkat</th>
+                  <th className="px-5 py-3.5">Keterangan Audit</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-[var(--border)]">
+                {historyRows.map((row) => {
+                  const isSuccess = row.status === "success";
+                  return (
+                    <tr key={row.id} className="transition hover:bg-[var(--surface)]/60">
+                      <td className="whitespace-nowrap px-5 py-3.5 font-mono text-xs text-[var(--fg-muted)]">
+                        {new Date(row.createdAt).toLocaleString("id-ID", {
+                          dateStyle: "medium",
+                          timeStyle: "short",
+                        })}
+                      </td>
+                      <td className="whitespace-nowrap px-5 py-3.5">
+                        {isSuccess ? (
+                          <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/15 px-2.5 py-0.5 text-xs font-bold text-emerald-800 dark:text-emerald-300">
+                            <CheckCircle2 className="h-3.5 w-3.5" />
+                            Berhasil
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 rounded-full bg-red-500/15 px-2.5 py-0.5 text-xs font-bold text-red-800 dark:text-red-300">
+                            <XCircle className="h-3.5 w-3.5" />
+                            Gagal
+                          </span>
+                        )}
+                      </td>
+                      <td className="px-5 py-3.5 font-medium text-[var(--fg)]">{row.email}</td>
+                      <td className="px-5 py-3.5 text-xs text-[var(--fg-muted)]">
+                        <div className="flex flex-col gap-0.5">
+                          <span className="inline-flex items-center gap-1 font-mono text-[11px] text-[var(--fg)]">
+                            <Globe className="h-3 w-3 text-[#D97706]" />
+                            {row.ipAddress || "127.0.0.1"}
+                          </span>
+                          <span className="inline-flex items-center gap-1 text-[11px]">
+                            <Monitor className="h-3 w-3" />
+                            {row.userAgent || "Browser Client"}
+                          </span>
+                        </div>
+                      </td>
+                      <td className="px-5 py-3.5 text-xs text-[var(--fg)]">
+                        {row.reason || "Aktivitas autentikasi sistem"}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
           </div>
         </div>
       </div>
