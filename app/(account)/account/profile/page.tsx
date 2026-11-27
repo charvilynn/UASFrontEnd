@@ -1,5 +1,7 @@
+import React from "react";
 import Link from "next/link";
 import {
+  Award,
   Bell,
   BookCopy,
   BookOpen,
@@ -690,6 +692,110 @@ export default async function ProfilePage() {
             )}
           </div>
 
+          <div className="space-y-6 lg:col-span-5">
+            <div className="rounded-2xl border border-[var(--border)] bg-[var(--card)] p-6 shadow-xs">
+              <div className="flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2">
+                  <Award className="h-5 w-5 text-[#92400E] dark:text-amber-400" />
+                  <h3 className="font-heading text-lg font-bold text-[var(--fg)]">
+                    Target Literasi 2026
+                  </h3>
+                </div>
+                <Link
+                  href="/account/reading-goals"
+                  className="text-xs font-semibold text-[#92400E] hover:underline dark:text-amber-300"
+                >
+                  Sesuaikan Target
+                </Link>
+              </div>
+
+              <div className="mt-4 space-y-4">
+                <div>
+                  <div className="mb-1.5 flex items-center justify-between text-xs">
+                    <span className="font-medium text-[var(--fg-muted)]">
+                      Target Buku Selesai
+                    </span>
+                    <span className="font-bold text-[var(--fg)]">
+                      {goal2026.currentBooks} / {goal2026.targetBooks} Buku (
+                      {bookGoalPercent}%)
+                    </span>
+                  </div>
+                  <div className="h-2.5 w-full overflow-hidden rounded-full bg-[var(--muted)]">
+                    <div
+                      className="h-full rounded-full bg-[#92400E] transition-all"
+                      style={{ width: `${bookGoalPercent}%` }}
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <div className="mb-1.5 flex items-center justify-between text-xs">
+                    <span className="font-medium text-[var(--fg-muted)]">
+                      Target Halaman Terbaca
+                    </span>
+                    <span className="font-bold text-[var(--fg)]">
+                      {goal2026.currentPages.toLocaleString("id-ID")} /{" "}
+                      {goal2026.targetPages.toLocaleString("id-ID")} Hal
+                    </span>
+                  </div>
+                  <div className="h-2.5 w-full overflow-hidden rounded-full bg-[var(--muted)]">
+                    <div
+                      className="h-full rounded-full bg-[#D97706] transition-all"
+                      style={{
+                        width: `${Math.min(
+                          100,
+                          Math.round(
+                            (goal2026.currentPages /
+                              Math.max(1, goal2026.targetPages)) *
+                              100
+                          )
+                        )}%`,
+                      }}
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="rounded-2xl border border-[var(--border)] bg-[var(--card)] p-6 shadow-xs">
+              <div className="flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2">
+                  <Bell className="h-4 w-4 text-[#92400E] dark:text-amber-400" />
+                  <h3 className="font-heading text-base font-bold text-[var(--fg)]">
+                    Notifikasi Terbaru
+                  </h3>
+                </div>
+                <Link
+                  href="/account/notifications"
+                  className="text-xs font-semibold text-[#92400E] hover:underline dark:text-amber-300"
+                >
+                  Kotak Masuk
+                </Link>
+              </div>
+
+              {member.notifications.length > 0 ? (
+                <ul className="mt-3 space-y-2.5">
+                  {member.notifications.map((notif) => (
+                    <li
+                      key={notif.id}
+                      className="rounded-xl border border-[var(--border)] bg-[var(--surface)]/70 p-3"
+                    >
+                      <p className="text-xs font-bold text-[var(--fg)]">
+                        {notif.title}
+                      </p>
+                      <p className="mt-0.5 line-clamp-2 text-xs text-[var(--fg-muted)]">
+                        {notif.message}
+                      </p>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="mt-3 text-xs text-[var(--fg-muted)]">
+                  Semua pemberitahuan akun telah dibaca.
+                </p>
+              )}
+            </div>
+          </div>
         </section>
       </main>
     </div>

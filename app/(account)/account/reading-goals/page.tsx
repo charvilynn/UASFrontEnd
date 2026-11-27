@@ -1,11 +1,14 @@
+import React from "react";
 import Link from "next/link";
 import {
   Award,
   BookCheck,
   BookOpen,
   Calendar,
+  CheckCircle2,
   Flame,
   Save,
+  Sparkles,
   Target,
 } from "lucide-react";
 import { prisma } from "@/lib/db";
@@ -302,6 +305,131 @@ export default async function ReadingGoalsPage() {
             </form>
           </div>
 
+          <div className="space-y-6 lg:col-span-5">
+            <div className="rounded-2xl border border-[var(--border)] bg-[var(--card)] p-6 shadow-xs">
+              <div className="flex items-center gap-2">
+                <Sparkles className="h-5 w-5 text-[#92400E]" />
+                <h3 className="font-heading text-lg font-bold text-[var(--fg)]">
+                  Preset Target Akademik Cepat
+                </h3>
+              </div>
+              <p className="mt-1 text-xs text-[var(--fg-muted)]">
+                Terapkan standar target baca populer hanya dengan satu klik:
+              </p>
+
+              <div className="mt-4 space-y-3">
+                {[
+                  {
+                    title: "Pembaca Konsisten (1 Buku/Bulan)",
+                    books: 12,
+                    pages: 3600,
+                    desc: "Cocok untuk mahasiswa dengan jadwal kuliah padat.",
+                  },
+                  {
+                    title: "Peneliti Literasi (2 Buku/Bulan)",
+                    books: 24,
+                    pages: 7200,
+                    desc: "Ideal untuk penyusunan skripsi dan kajian pustaka.",
+                  },
+                  {
+                    title: "Bibliophile Akademik (3 Buku/Bulan)",
+                    books: 36,
+                    pages: 10800,
+                    desc: "Tantangan intensif eksplorasi lintas disiplin ilmu.",
+                  },
+                ].map((preset) => (
+                  <form
+                    key={preset.title}
+                    action={updateReadingGoalAction}
+                    className="flex items-center justify-between gap-3 rounded-xl border border-[var(--border)] bg-[var(--surface)]/60 p-3.5"
+                  >
+                    <input
+                      type="hidden"
+                      name="targetBooks"
+                      value={preset.books}
+                    />
+                    <input
+                      type="hidden"
+                      name="targetPages"
+                      value={preset.pages}
+                    />
+                    <input
+                      type="hidden"
+                      name="currentBooks"
+                      value={goal.currentBooks}
+                    />
+                    <input
+                      type="hidden"
+                      name="currentPages"
+                      value={goal.currentPages}
+                    />
+                    <div>
+                      <p className="text-xs font-bold text-[var(--fg)]">
+                        {preset.title}
+                      </p>
+                      <p className="text-[11px] text-[var(--fg-muted)]">
+                        {preset.books} buku &bull;{" "}
+                        {preset.pages.toLocaleString("id-ID")} hal &bull;{" "}
+                        {preset.desc}
+                      </p>
+                    </div>
+                    <button
+                      type="submit"
+                      className="shrink-0 cursor-pointer rounded-lg border border-[#92400E] px-3 py-1.5 text-xs font-semibold text-[#92400E] transition-colors hover:bg-[#92400E] hover:text-white dark:text-amber-300"
+                    >
+                      Pilih
+                    </button>
+                  </form>
+                ))}
+              </div>
+            </div>
+
+            <div className="rounded-2xl border border-[var(--border)] bg-[var(--card)] p-6 shadow-xs">
+              <div className="flex items-center gap-2">
+                <Award className="h-5 w-5 text-[#92400E]" />
+                <h3 className="font-heading text-base font-bold text-[var(--fg)]">
+                  Milestone Pencapaian 2026
+                </h3>
+              </div>
+
+              <ul className="mt-4 space-y-2.5 text-xs">
+                {[
+                  {
+                    label: "Langkah Pertama: 1 Buku Selesai",
+                    unlocked: goal.currentBooks >= 1,
+                  },
+                  {
+                    label: "Penjelajah Pustaka: 1.000 Halaman Terbaca",
+                    unlocked: goal.currentPages >= 1000,
+                  },
+                  {
+                    label: "Separuh Jalan: 50% Target Buku Tercapai",
+                    unlocked: bookPct >= 50,
+                  },
+                  {
+                    label: "Tuntas Paripurna: 100% Target 2026 Selesai",
+                    unlocked: bookPct >= 100 && pagePct >= 100,
+                  },
+                ].map((milestone) => (
+                  <li
+                    key={milestone.label}
+                    className={`flex items-center justify-between rounded-xl border p-3 ${
+                      milestone.unlocked
+                        ? "border-emerald-600/30 bg-emerald-600/10 text-[var(--fg)]"
+                        : "border-[var(--border)] bg-[var(--surface)]/40 text-[var(--fg-muted)]"
+                    }`}
+                  >
+                    <span className="font-semibold">{milestone.label}</span>
+                    {milestone.unlocked ? (
+                      <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-600" />
+                    ) : (
+                      <span className="text-[10px] uppercase">Terkunci</span>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
         </section>
       </main>
     </div>
