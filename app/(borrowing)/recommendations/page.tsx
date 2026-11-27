@@ -1,7 +1,12 @@
+import React from "react";
 import Link from "next/link";
 import {
+  Wand2,
   Sparkles,
+  TrendingUp,
   Layers,
+  Heart,
+  SlidersHorizontal,
 } from "lucide-react";
 import { prisma } from "@/lib/db";
 import { getSessionUser } from "@/lib/auth";
@@ -146,6 +151,7 @@ export default async function RecommendationsPage({
     .sort((a, b) => b.score - a.score);
 
   const topPicks = scoredBooks.slice(0, 8);
+  const moreDiscovery = scoredBooks.slice(8, 16);
 
   return (
     <div className="min-h-screen pb-16">
@@ -153,9 +159,79 @@ export default async function RecommendationsPage({
         title="Rekomendasi Bacaan Personal"
         subtitle="Saran buku pilihan yang dikurasi secara dinamis berdasarkan preferensi genre, riwayat peminjaman, dan peringkat tertinggi komunitas."
         fallbackHref="/explore"
+        actions={
+          <div className="flex flex-wrap items-center gap-2.5">
+            {user ? (
+              <Link
+                href="/onboarding"
+                className="inline-flex items-center gap-2 rounded-lg bg-[#92400E] px-4 py-2 text-xs font-semibold text-white transition-colors hover:bg-[#78350F]"
+              >
+                <SlidersHorizontal className="h-4 w-4" />
+                <span>Sesuaikan Minat Baca</span>
+              </Link>
+            ) : (
+              <Link
+                href="/login?next=/recommendations"
+                className="inline-flex items-center gap-2 rounded-lg bg-[#92400E] px-4 py-2 text-xs font-semibold text-white transition-colors hover:bg-[#78350F]"
+              >
+                <Sparkles className="h-4 w-4" />
+                <span>Masuk untuk Personalisasi</span>
+              </Link>
+            )}
+            <Link
+              href="/wishlist"
+              className="inline-flex items-center gap-2 rounded-lg border border-[var(--border)] bg-[var(--card)] px-4 py-2 text-xs font-semibold text-[var(--fg)] transition-colors hover:border-[#92400E]"
+            >
+              <Heart className="h-4 w-4 text-rose-600" />
+              <span>Daftar Keinginan</span>
+            </Link>
+          </div>
+        }
       />
 
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <section
+          aria-label="Status Personalisasi"
+          className="mb-8 rounded-2xl border border-[var(--border)] bg-[var(--card)] p-5 shadow-xs"
+        >
+          <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
+            <div className="flex items-start gap-3.5">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#92400E]/15 text-[#92400E] dark:text-amber-400">
+                <Wand2 className="h-5 w-5" />
+              </div>
+              <div>
+                <h2 className="font-heading text-lg font-bold text-[var(--fg)]">
+                  {user
+                    ? `Mesin Rekomendasi Aktif untuk ${user.name}`
+                    : "Mode Rekomendasi Kurator & Tren Kampus"}
+                </h2>
+                <p className="mt-0.5 text-xs text-[var(--fg-muted)]">
+                  {user && userPrefs.length > 0
+                    ? `Menampilkan kecocokan tertinggi berdasarkan ${userPrefs.length} genre favorit dan ${userLoans.length} riwayat sirkulasi Anda.`
+                    : "Menampilkan buku dengan rating tertinggi dan sirkulasi terpopuler. Masuk akun dan atur orientasi minat untuk rekomendasi spesifik."}
+                </p>
+              </div>
+            </div>
+
+            {userPrefs.length > 0 && (
+              <div className="flex flex-wrap items-center gap-1.5">
+                {userPrefs.map((pref) => (
+                  <Link
+                    key={pref.id}
+                    href={`/recommendations?category=${encodeURIComponent(
+                      pref.category.slug
+                    )}`}
+                    className="inline-flex items-center gap-1 rounded-full border border-amber-300 bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-950 transition-colors hover:bg-amber-100 dark:border-amber-800 dark:bg-amber-950/60 dark:text-amber-200"
+                  >
+                    <Sparkles className="h-3 w-3 text-amber-600" />
+                    <span>{pref.category.name}</span>
+                  </Link>
+                ))}
+              </div>
+            )}
+          </div>
+        </section>
+
         <div className="mb-6 flex flex-wrap items-center gap-2 rounded-xl border border-[var(--border)] bg-[var(--surface)]/70 p-3">
           <span className="inline-flex items-center gap-1.5 px-2 text-xs font-semibold text-[var(--fg-muted)]">
             <Layers className="h-4 w-4 text-[#92400E]" />
@@ -239,6 +315,36 @@ export default async function RecommendationsPage({
               </div>
             </section>
 
+            {moreDiscovery.length > 0 && (
+              <section aria-labelledby="more-discovery-heading">
+                <div className="mb-4 flex items-center gap-2">
+                  <TrendingUp className="h-5 w-5 text-[#92400E]" />
+                  <h2
+                    id="more-discovery-heading"
+                    className="font-heading text-xl font-bold text-[var(--fg)]"
+                  >
+                    Sorotan Lintas Disiplin & Rating Tinggi
+                  </h2>
+                </div>
+
+                <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+                  {moreDiscovery.map((item) => (
+                    <div key={item.book.id} className="flex flex-col">
+                      <div className="mb-2 inline-flex items-center gap-1.5 rounded-lg border border-[var(--border)] bg-[var(--surface)] px-2.5 py-1 text-[11px] font-medium text-[var(--fg-muted)]">
+                        <TrendingUp className="h-3 w-3 shrink-0 text-[#92400E]" />
+                        <span className="truncate">{item.reason}</span>
+                      </div>
+                      <div className="flex-1">
+                        <BookCard
+                          book={item.book}
+                          isAdmin={user?.role === "admin"}
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
           </>
         )}
       </div>
