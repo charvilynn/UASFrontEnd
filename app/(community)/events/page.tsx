@@ -1,9 +1,14 @@
+import React from "react";
 import Link from "next/link";
 import {
   Calendar,
+  Clock,
+  MapPin,
+  Mic,
   Users,
   Ticket,
   Search,
+  ArrowRight,
   Sparkles,
 } from "lucide-react";
 import { prisma } from "@/lib/db";
@@ -202,6 +207,130 @@ export default async function EventsPage({ searchParams }: EventsPageProps) {
           </div>
         </section>
 
+        {filteredEvents.length === 0 ? (
+          <div className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-10 text-center">
+            <Calendar className="mx-auto h-10 w-10 text-[var(--fg-muted)]" />
+            <h2 className="font-heading mt-3 text-lg font-bold text-[var(--fg)]">
+              Kegiatan Tidak Ditemukan
+            </h2>
+            <p className="mt-1 text-sm text-[var(--fg-muted)]">
+              Tidak ada jadwal acara yang sesuai dengan filter kategori atau
+              pencarian Anda.
+            </p>
+            <Link
+              href="/events"
+              className="mt-4 inline-flex items-center gap-1.5 rounded-lg bg-[#92400E] px-4 py-2 text-xs font-semibold text-white hover:bg-[#78350F]"
+            >
+              Lihat Semua Acara
+            </Link>
+          </div>
+        ) : (
+          <section
+            aria-label="Daftar Jadwal Acara"
+            className="grid grid-cols-1 gap-6 md:grid-cols-2"
+          >
+            {filteredEvents.map((ev) => {
+              const registeredCount = ev.rsvps.length;
+              const remainingSeats = Math.max(0, ev.maxQuota - registeredCount);
+              const fillPercent = Math.min(
+                100,
+                Math.round((registeredCount / Math.max(1, ev.maxQuota)) * 100)
+              );
+
+              return (
+                <article
+                  key={ev.id}
+                  className="book-card-3d flex flex-col justify-between rounded-2xl border border-[var(--border)] bg-[var(--card)] p-6 shadow-xs"
+                >
+                  <div>
+                    <div className="mb-3 flex flex-wrap items-center justify-between gap-2 text-xs">
+                      <span className="rounded-full bg-[#92400E]/15 px-3 py-1 font-semibold text-[#92400E] dark:text-amber-300">
+                        {ev.category}
+                      </span>
+
+                      <span
+                        className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 font-semibold ${
+                          remainingSeats > 5
+                            ? "bg-emerald-500/15 text-emerald-800 dark:text-emerald-300"
+                            : remainingSeats > 0
+                              ? "bg-amber-500/15 text-amber-800 dark:text-amber-300"
+                              : "bg-red-500/15 text-red-800 dark:text-red-300"
+                        }`}
+                      >
+                        <Ticket className="h-3.5 w-3.5" />
+                        {remainingSeats > 0
+                          ? `Sisa ${remainingSeats} dari ${ev.maxQuota} kursi`
+                          : "Kuota Penuh"}
+                      </span>
+                    </div>
+
+                    <h2 className="font-heading text-xl font-bold text-[var(--fg)]">
+                      <Link
+                        href={`/events/${ev.id}`}
+                        className="hover:text-[#92400E] dark:hover:text-amber-400"
+                      >
+                        {ev.title}
+                      </Link>
+                    </h2>
+
+                    <p className="mt-2 line-clamp-2 text-sm leading-relaxed text-[var(--fg-muted)]">
+                      {ev.description}
+                    </p>
+
+                    <div className="mt-4 grid grid-cols-1 gap-2 rounded-xl border border-[var(--border)] bg-[var(--surface)]/70 p-3.5 text-xs sm:grid-cols-2">
+                      <div className="flex items-center gap-2 text-[var(--fg)]">
+                        <Calendar className="h-4 w-4 shrink-0 text-[#92400E]" />
+                        <span>{ev.eventDate}</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-[var(--fg)]">
+                        <Clock className="h-4 w-4 shrink-0 text-[#92400E]" />
+                        <span>{ev.eventTime}</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-[var(--fg)]">
+                        <MapPin className="h-4 w-4 shrink-0 text-[#D97706]" />
+                        <span className="truncate">{ev.location}</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-[var(--fg)]">
+                        <Mic className="h-4 w-4 shrink-0 text-[#D97706]" />
+                        <span className="truncate font-semibold">
+                          {ev.speakerName}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="mt-4">
+                      <div className="mb-1 flex items-center justify-between text-[11px] text-[var(--fg-muted)]">
+                        <span>
+                          Terisi: {registeredCount} peserta terdaftar
+                        </span>
+                        <span>{fillPercent}% kuota</span>
+                      </div>
+                      <div className="h-2 w-full overflow-hidden rounded-full bg-[var(--muted)]">
+                        <div
+                          className="h-full rounded-full bg-[#92400E] transition-all"
+                          style={{ width: `${fillPercent}%` }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="mt-5 flex items-center justify-between border-t border-[var(--border)] pt-4">
+                    <span className="text-xs font-medium text-[var(--fg-muted)]">
+                      Gratis untuk anggota Charvlibrary
+                    </span>
+                    <Link
+                      href={`/events/${ev.id}`}
+                      className="inline-flex items-center gap-1.5 rounded-lg bg-[#92400E] px-4 py-2 text-xs font-semibold text-white transition-colors hover:bg-[#78350F]"
+                    >
+                      Detail & Daftar RSVP
+                      <ArrowRight className="h-3.5 w-3.5" />
+                    </Link>
+                  </div>
+                </article>
+              );
+            })}
+          </section>
+        )}
       </div>
     </div>
   );
