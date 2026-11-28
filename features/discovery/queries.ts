@@ -1,5 +1,6 @@
 import { BookCardData } from "@/components/books/BookCard";
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function mapPrismaBookToCard(book: any, wishlistBookIds?: Set<number>): BookCardData {
   const primaryAuthor = book.authors?.[0]?.author;
   const primaryCategory = book.categories?.[0]?.category;
@@ -24,3 +25,4 @@ export function mapPrismaBookToCard(book: any, wishlistBookIds?: Set<number>): B
     inWishlist: wishlistBookIds ? wishlistBookIds.has(book.id) : false,
   };
 }
+

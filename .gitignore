@@ -32,6 +32,17 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+!.env.example
+
+# SQLite database & user uploads
+/data/*.db
+/data/*.db-journal
+/data/*.db-shm
+/data/*.db-wal
+/data/uploads/*
+!/data/uploads/.gitkeep
+/test-results/
+/playwright-report/
 
 # vercel
 .vercel
