@@ -1,3 +1,4 @@
+import React from "react";
 import Link from "next/link";
 import {
   BookCheck,
@@ -402,6 +403,87 @@ export default async function ReadingHistoryPage({
                             </div>
                           </div>
 
+                          <div className="rounded-xl border border-[var(--border)] bg-[var(--surface)]/70 p-3.5">
+                            <p className="text-[11px] font-bold tracking-wider uppercase text-[#92400E] dark:text-amber-300">
+                              Catatan Refleksi Anggota:
+                            </p>
+                            <p className="mt-1 text-xs leading-relaxed text-[var(--fg)]">
+                              {entry.reflection ||
+                                "Belum ada catatan refleksi tertulis untuk buku ini."}
+                            </p>
+                          </div>
+
+                          <details className="group text-xs">
+                            <summary className="cursor-pointer font-semibold text-[#92400E] hover:underline dark:text-amber-300">
+                              Perbarui Halaman / Refleksi Buku Ini
+                            </summary>
+                            <form
+                              action={logReadingHistoryAction}
+                              className="mt-3 space-y-3 rounded-xl border border-[var(--border)] bg-[var(--surface)]/50 p-3.5"
+                            >
+                              <input
+                                type="hidden"
+                                name="historyId"
+                                value={entry.id}
+                              />
+                              <input
+                                type="hidden"
+                                name="bookId"
+                                value={entry.bookId}
+                              />
+                              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                                <div>
+                                  <label className="mb-1 block text-[11px] font-semibold text-[var(--fg)]">
+                                    Halaman Terbaca
+                                  </label>
+                                  <input
+                                    type="number"
+                                    name="pagesRead"
+                                    min={1}
+                                    max={entry.book.pages}
+                                    defaultValue={entry.pagesRead}
+                                    className="w-full rounded-lg border border-[var(--border)] bg-[var(--card)] px-3 py-1.5 text-xs text-[var(--fg)]"
+                                  />
+                                </div>
+                                <div>
+                                  <label className="mb-1 block text-[11px] font-semibold text-[var(--fg)]">
+                                    Status Bacaan
+                                  </label>
+                                  <select
+                                    name="status"
+                                    defaultValue={entry.status}
+                                    className="w-full rounded-lg border border-[var(--border)] bg-[var(--card)] px-3 py-1.5 text-xs text-[var(--fg)]"
+                                  >
+                                    <option value="completed">
+                                      Selesai Dibaca
+                                    </option>
+                                    <option value="reading">
+                                      Sedang Dibaca
+                                    </option>
+                                    <option value="dropped">Ditunda</option>
+                                  </select>
+                                </div>
+                              </div>
+                              <div>
+                                <label className="mb-1 block text-[11px] font-semibold text-[var(--fg)]">
+                                  Refleksi Baru
+                                </label>
+                                <input
+                                  type="text"
+                                  name="reflection"
+                                  defaultValue={entry.reflection ?? ""}
+                                  placeholder="Perbarui catatan refleksi..."
+                                  className="w-full rounded-lg border border-[var(--border)] bg-[var(--card)] px-3 py-1.5 text-xs text-[var(--fg)]"
+                                />
+                              </div>
+                              <button
+                                type="submit"
+                                className="cursor-pointer rounded-lg bg-[#92400E] px-4 py-1.5 text-xs font-semibold text-white hover:bg-[#78350F]"
+                              >
+                                Simpan Pembaruan
+                              </button>
+                            </form>
+                          </details>
                         </div>
                       </div>
                     </article>

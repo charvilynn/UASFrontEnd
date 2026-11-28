@@ -49,7 +49,7 @@ export function Footer() {
         </div>
 
         <div className="mt-6 flex flex-col justify-between gap-2 border-t border-[var(--border)] pt-5 text-xs text-[var(--fg-subtle)] sm:flex-row sm:items-center">
-          <p> 2026 Charvlibrary. Ruang baca literatur akademik dan sastra.</p>
+          <p>© 2026 Charvlibrary. Ruang baca literatur akademik dan sastra.</p>
           <p>Atribusi metadata & sampul buku: Open Library.</p>
         </div>
       </div>
