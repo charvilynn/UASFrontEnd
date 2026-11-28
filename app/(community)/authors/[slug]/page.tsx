@@ -1,3 +1,4 @@
+import React from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import {
@@ -61,6 +62,19 @@ export default async function AuthorDetailPage({
   if (!author) {
     notFound();
   }
+
+  const otherAuthors = await prisma.author.findMany({
+    where: {
+      id: { not: author.id },
+    },
+    include: {
+      _count: {
+        select: { books: true },
+      },
+    },
+    orderBy: { name: "asc" },
+    take: 6,
+  });
 
   const bookCards: BookCardData[] = author.books.map((ba) => {
     const b = ba.book;
@@ -233,6 +247,43 @@ export default async function AuthorDetailPage({
           )}
         </section>
 
+        <section
+          aria-label="Tokoh Penulis Lainnya"
+          className="rounded-2xl border border-[var(--border)] bg-[var(--surface)]/70 p-6"
+        >
+          <div className="mb-4 flex items-center justify-between">
+            <h2 className="font-heading text-lg font-bold text-[var(--fg)]">
+              Jelajahi Penulis Lainnya
+            </h2>
+            <Link
+              href="/authors"
+              className="inline-flex items-center gap-1 text-xs font-semibold text-[#92400E] hover:underline dark:text-amber-400"
+            >
+              Lihat Semua
+              <ArrowRight className="h-3.5 w-3.5" />
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {otherAuthors.map((item) => (
+              <Link
+                key={item.id}
+                href={`/authors/${item.slug}`}
+                className="flex items-center justify-between rounded-xl border border-[var(--border)] bg-[var(--card)] p-3.5 transition-colors hover:border-[#92400E]"
+              >
+                <div>
+                  <p className="font-heading text-sm font-bold text-[var(--fg)]">
+                    {item.name}
+                  </p>
+                  <p className="text-xs text-[var(--fg-muted)]">
+                    {item.nationality} &bull; {item._count.books} Buku
+                  </p>
+                </div>
+                <ArrowRight className="h-4 w-4 text-[#92400E]" />
+              </Link>
+            ))}
+          </div>
+        </section>
       </div>
     </div>
   );
