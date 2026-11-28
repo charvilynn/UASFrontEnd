@@ -1,3 +1,4 @@
+import React from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import {
@@ -61,6 +62,19 @@ export default async function BlogDetailPage({
   if (!post) {
     notFound();
   }
+
+  const relatedPosts = await prisma.blogPost.findMany({
+    where: {
+      id: { not: post.id },
+    },
+    include: {
+      _count: {
+        select: { comments: true },
+      },
+    },
+    orderBy: [{ isFeatured: "desc" }, { publishedAt: "desc" }],
+    take: 3,
+  });
 
   const paragraphs = post.content
     .split(/\n+/)
@@ -327,6 +341,84 @@ export default async function BlogDetailPage({
             </section>
           </main>
 
+          <aside className="space-y-6 lg:col-span-4">
+            <div className="rounded-2xl border border-[var(--border)] bg-[var(--card)] p-5 shadow-xs">
+              <h2 className="font-heading text-base font-bold text-[var(--fg)]">
+                Rekomendasi Artikel Terkait
+              </h2>
+              <p className="mt-1 text-xs text-[var(--fg-muted)]">
+                Bacaan kuratorial lain dari jurnal literasi Charvlibrary.
+              </p>
+
+              <div className="mt-4 space-y-3.5">
+                {relatedPosts.map((item) => (
+                  <div
+                    key={item.id}
+                    className="rounded-xl border border-[var(--border)] bg-[var(--surface)]/50 p-3.5 transition-colors hover:border-[#92400E]"
+                  >
+                    <div className="flex items-center justify-between text-[11px] text-[var(--fg-muted)]">
+                      <span className="font-semibold text-[#92400E] dark:text-amber-400">
+                        {item.category}
+                      </span>
+                      <span>{item.readTimeMinutes} menit baca</span>
+                    </div>
+                    <h3 className="font-heading mt-1 text-sm font-bold text-[var(--fg)]">
+                      <Link
+                        href={`/blog/${item.slug}`}
+                        className="hover:text-[#92400E] hover:underline"
+                      >
+                        {item.title}
+                      </Link>
+                    </h3>
+                    <p className="mt-1 line-clamp-2 text-xs text-[var(--fg-muted)]">
+                      {item.excerpt}
+                    </p>
+                  </div>
+                ))}
+              </div>
+
+              <Link
+                href="/blog"
+                className="mt-4 inline-flex w-full items-center justify-center gap-1.5 rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-xs font-semibold text-[var(--fg)] hover:border-[#92400E] hover:text-[#92400E]"
+              >
+                Lihat Indeks Jurnal Lengkap
+                <ArrowRight className="h-3.5 w-3.5" />
+              </Link>
+            </div>
+
+            <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5">
+              <h2 className="font-heading text-base font-bold text-[var(--fg)]">
+                Jelajahi Ekosistem Literasi
+              </h2>
+              <p className="mt-1 text-xs text-[var(--fg-muted)]">
+                Temukan profil penulis buku, jadwal bedah buku, dan pusat
+                bantuan perpustakaan.
+              </p>
+              <div className="mt-4 space-y-2">
+                <Link
+                  href="/authors"
+                  className="flex items-center justify-between rounded-lg border border-[var(--border)] bg-[var(--card)] px-3.5 py-2.5 text-xs font-semibold text-[var(--fg)] hover:border-[#92400E]"
+                >
+                  <span>Direktori Penulis Nusantara & Dunia</span>
+                  <ArrowRight className="h-3.5 w-3.5 text-[#92400E]" />
+                </Link>
+                <Link
+                  href="/events"
+                  className="flex items-center justify-between rounded-lg border border-[var(--border)] bg-[var(--card)] px-3.5 py-2.5 text-xs font-semibold text-[var(--fg)] hover:border-[#92400E]"
+                >
+                  <span>Jadwal Acara & Bedah Buku</span>
+                  <ArrowRight className="h-3.5 w-3.5 text-[#92400E]" />
+                </Link>
+                <Link
+                  href="/faq"
+                  className="flex items-center justify-between rounded-lg border border-[var(--border)] bg-[var(--card)] px-3.5 py-2.5 text-xs font-semibold text-[var(--fg)] hover:border-[#92400E]"
+                >
+                  <span>Tanya Jawab Interaktif (FAQ)</span>
+                  <ArrowRight className="h-3.5 w-3.5 text-[#92400E]" />
+                </Link>
+              </div>
+            </div>
+          </aside>
         </div>
       </div>
     </div>
